@@ -16,10 +16,9 @@
 #define ANGLE_LSB    24
 #define ANGLE_MSB    25
 
-
 #define DEG_PER_TICK (1.0 / 100.0)
-#define GAIN_ROTATE (1.0 / 0.90)
-#define MIN_SPEED   ((int16_t)50)
+#define GAIN_ROTATE  (1.0 / 0.90)
+#define MIN_SPEED    ((int16_t)50)
 
 #define sign(x) ((int8_t)((x) >= 0 ? 1 : -1))
 
@@ -38,24 +37,29 @@ static volatile int16_t setpoint_angle_deg;
 static uint8_t rotation_complete = 0;
 static uint8_t distance_complete = 0;
 
-void Kobuki_Tx( uint8_t * payload , uint8_t size_payload ) {
-    uint8_t checksum = 0 , i ;
+void Kobuki_Tx(uint8_t *payload, uint8_t size_payload)
+{
+    uint8_t checksum = 0, i;
+
     UART_Tx(0xAA); // Send header 0
     UART_Tx(0x55); // Send header 1
     UART_Tx(size_payload); // Send size of payload in bytes
-    checksum ^= size_payload ; // Calculate running checksum
+    checksum ^= size_payload; // Calculate running checksum
+
     // Send each byte of payload one-by-one
-    for( i = 0; i < size_payload; ++i) {
-        UART_Tx(payload[i]) ;
+    for (i = 0; i < size_payload; ++i) {
+        UART_Tx(payload[i]);
         checksum ^= payload[i];
     }
 
-    UART_Tx (checksum) ; // Send checksum
+    UART_Tx(checksum); // Send checksum
 }
 
-uint8_t Kobuki_Rx(uint8_t *feedback, uint32_t size_feedback) {
+uint8_t Kobuki_Rx(uint8_t *feedback, uint32_t size_feedback)
+{
     uint8_t feedback_header = 0, size_payload = 0, checksum = 0, rx_checksum = 0;
     uint32_t i;
+
     // 1. Find the valid 0xAA 0x55 sequence
     while (1) {
         feedback_header = UART_Rx();
@@ -66,20 +70,25 @@ uint8_t Kobuki_Rx(uint8_t *feedback, uint32_t size_feedback) {
             }
         }
     }
+
     // 2. Read Payload Length, first byte is size of payload inbytes
     size_payload = UART_Rx();
     checksum ^= size_payload; // checksum is XOR ed value ofentire bytestream
+
     // 3. Determine safe boundary to prevent array overflow
     uint32_t limit = (size_payload < size_feedback) ? size_payload : size_feedback;
+
     // 4. Read into array of bytestream, this is the basic sensor data
     for (i = 0; i < limit; i++) {
         feedback[i] = UART_Rx();
         checksum ^= feedback[i];
     }
+
     // 5. Read and discard remaining payload (just for checksum), this is the size of rest of byestream
     for (i = limit; i < size_payload; i++) {
         checksum ^= UART_Rx();
     }
+
     rx_checksum = UART_Rx(); // checksum from kobuki-final byte
     /* Reject a bad checksum or a payload shorter than required. */
     return ((checksum != rx_checksum) || (size_payload < size_feedback));
@@ -114,44 +123,50 @@ void Kobuki_Read(Kobuki_Typedef *kobuki)
     kobuki->distance_complete = distance_complete;
 }
 
-void Kobuki_Drive(int16_t speed){
+void Kobuki_Drive(int16_t speed)
+{
     // uint8_t speed_lsb = 0;
     // uint8_t speed_msb = 0;
     // Construct payload
-    uint8_t payload[] = {0x01,0x04,0x00,0x00,0x00,0x00};
+    uint8_t payload[] = {0x01, 0x04, 0x00, 0x00, 0x00, 0x00};
+
     // saturation to avoid going over speed limit
-    if ( speed > SPEED_LIMIT ){
+    if (speed > SPEED_LIMIT) {
         speed = SPEED_LIMIT;
-    } else if ( speed <-SPEED_LIMIT ){
-        speed = (~SPEED_LIMIT)+1;
     }
+    else if (speed < -SPEED_LIMIT) {
+        speed = (~SPEED_LIMIT) + 1;
+    }
+
     // Split LSB & MSB for payload
     // There is no truncation warning due to stdint
     payload[2] = (uint8_t)speed;
     payload[3] = (uint8_t)(speed >> 8);
-    Kobuki_Tx(payload,sizeof(payload));
+    Kobuki_Tx(payload, sizeof(payload));
 }
 
-void Kobuki_Rotate(int16_t speed) {
+void Kobuki_Rotate(int16_t speed)
+{
     // uint8_t speed_lsb = 0;
     // uint8_t speed_msb = 0;
     // Construct payload
-    uint8_t payload[] = {0x01,0x04,0x00,0x00,0x01,0x00};
+    uint8_t payload[] = {0x01, 0x04, 0x00, 0x00, 0x01, 0x00};
+
     // saturation to avoid going over speed limit
-    if (speed > SPEED_LIMIT){
-    speed = SPEED_LIMIT;
+    if (speed > SPEED_LIMIT) {
+        speed = SPEED_LIMIT;
     }
-    else if ( speed <-SPEED_LIMIT ){
-    speed = (~SPEED_LIMIT)+1;
+    else if (speed < -SPEED_LIMIT) {
+        speed = (~SPEED_LIMIT) + 1;
     }
+
     //split lsb & msb for payload
     payload[2] = (uint8_t)speed;
     payload[3] = (uint8_t)(speed >> 8);
-    Kobuki_Tx(payload,sizeof(payload));
+    Kobuki_Tx(payload, sizeof(payload));
 }
 
-void Kobuki_Rotate_Angle_Setpoint(int16_t current_angle_tick,
-                                 int16_t rot_angle_deg)
+void Kobuki_Rotate_Angle_Setpoint(int16_t current_angle_tick, int16_t rot_angle_deg)
 {
     volatile int32_t init_angle;
 
@@ -208,7 +223,8 @@ void Kobuki_Rotate_Angle(int16_t current_angle_tick)
     }
 }
 
-void Kobuki_Drive_Distance_Setpoint(uint16_t current_distance_tick, int16_t distance){
+void Kobuki_Drive_Distance_Setpoint(uint16_t current_distance_tick, int16_t distance)
+{
     distance_complete = 0;
 
     /* Convert the requested distance into encoder ticks,
@@ -217,7 +233,8 @@ void Kobuki_Drive_Distance_Setpoint(uint16_t current_distance_tick, int16_t dist
         current_distance_tick + (int32_t)(distance / MM_PER_TICK);
 }
 
-void Kobuki_Drive_Distance(uint16_t current_distance_tick){
+void Kobuki_Drive_Distance(uint16_t current_distance_tick)
+{
     uint16_t target_tick;
     int32_t error_ticks;
     int16_t error_mm;
@@ -253,6 +270,7 @@ void Kobuki_Drive_Distance(uint16_t current_distance_tick){
 }
 
 #define EXTERN_PWR 0x30
+
 void Kobuki_Update_LEDs(Kobuki_LED_Enum led_1_colour,
                         Kobuki_LED_Enum led_2_colour)
 {
