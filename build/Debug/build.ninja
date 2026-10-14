@@ -89,6 +89,46 @@ build CMakeFiles/kobuki-project.dir/Src/startup_stm32g474xx.S.obj: ASM_COMPILER_
   OBJECT_FILE_DIR = CMakeFiles/kobuki-project.dir/Src
   TARGET_SUPPORT_DIR = CMakeFiles/kobuki-project.dir
 
+build CMakeFiles/kobuki-project.dir/Src/ADC/adc.c.obj: C_COMPILER__kobuki-project_unscanned_Debug /Users/thomashesketh/Projects/kobuki-project/Src/ADC/adc.c || cmake_object_order_depends_target_kobuki-project
+  CONFIG = Debug
+  DEFINES = -DDEBUG -DRTE_DEVICE_STARTUP_STM32G4XX -DSTM32G4xx -DUSE_HAL_DRIVER
+  DEP_FILE = CMakeFiles/kobuki-project.dir/Src/ADC/adc.c.obj.d
+  FLAGS = -fdata-sections -ffunction-sections -Wl,--gc-sections -Wno-comment -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mlittle-endian -mthumb -std=gnu11 -fstack-usage -Wall -Wextra -Wpedantic -Wno-unused-parameter -O0 -g3 -ggdb
+  INCLUDES = -I/Users/thomashesketh/Projects/kobuki-project/Inc -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/CMSIS/Core/Include -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/BSP/STM32G4xx_Nucleo -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/STM32G4xx_HAL_Driver/Inc -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/Core/Inc -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/CMSIS/Device/ST/STM32G4xx/Include -I/Users/thomashesketh/Projects/kobuki-project/Src/Kobuki_Drivers -I/Users/thomashesketh/Projects/kobuki-project/Src/G474RE_Drivers -I/Users/thomashesketh/Projects/kobuki-project/Src/ADC -I/Users/thomashesketh/Projects/kobuki-project/Src/Ultrasonic
+  OBJECT_DIR = CMakeFiles/kobuki-project.dir
+  OBJECT_FILE_DIR = CMakeFiles/kobuki-project.dir/Src/ADC
+  TARGET_SUPPORT_DIR = CMakeFiles/kobuki-project.dir
+
+build CMakeFiles/kobuki-project.dir/Src/G474RE_Drivers/uart.c.obj: C_COMPILER__kobuki-project_unscanned_Debug /Users/thomashesketh/Projects/kobuki-project/Src/G474RE_Drivers/uart.c || cmake_object_order_depends_target_kobuki-project
+  CONFIG = Debug
+  DEFINES = -DDEBUG -DRTE_DEVICE_STARTUP_STM32G4XX -DSTM32G4xx -DUSE_HAL_DRIVER
+  DEP_FILE = CMakeFiles/kobuki-project.dir/Src/G474RE_Drivers/uart.c.obj.d
+  FLAGS = -fdata-sections -ffunction-sections -Wl,--gc-sections -Wno-comment -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mlittle-endian -mthumb -std=gnu11 -fstack-usage -Wall -Wextra -Wpedantic -Wno-unused-parameter -O0 -g3 -ggdb
+  INCLUDES = -I/Users/thomashesketh/Projects/kobuki-project/Inc -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/CMSIS/Core/Include -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/BSP/STM32G4xx_Nucleo -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/STM32G4xx_HAL_Driver/Inc -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/Core/Inc -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/CMSIS/Device/ST/STM32G4xx/Include -I/Users/thomashesketh/Projects/kobuki-project/Src/Kobuki_Drivers -I/Users/thomashesketh/Projects/kobuki-project/Src/G474RE_Drivers -I/Users/thomashesketh/Projects/kobuki-project/Src/ADC -I/Users/thomashesketh/Projects/kobuki-project/Src/Ultrasonic
+  OBJECT_DIR = CMakeFiles/kobuki-project.dir
+  OBJECT_FILE_DIR = CMakeFiles/kobuki-project.dir/Src/G474RE_Drivers
+  TARGET_SUPPORT_DIR = CMakeFiles/kobuki-project.dir
+
+build CMakeFiles/kobuki-project.dir/Src/Kobuki_Drivers/kobuki.c.obj: C_COMPILER__kobuki-project_unscanned_Debug /Users/thomashesketh/Projects/kobuki-project/Src/Kobuki_Drivers/kobuki.c || cmake_object_order_depends_target_kobuki-project
+  CONFIG = Debug
+  DEFINES = -DDEBUG -DRTE_DEVICE_STARTUP_STM32G4XX -DSTM32G4xx -DUSE_HAL_DRIVER
+  DEP_FILE = CMakeFiles/kobuki-project.dir/Src/Kobuki_Drivers/kobuki.c.obj.d
+  FLAGS = -fdata-sections -ffunction-sections -Wl,--gc-sections -Wno-comment -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mlittle-endian -mthumb -std=gnu11 -fstack-usage -Wall -Wextra -Wpedantic -Wno-unused-parameter -O0 -g3 -ggdb
+  INCLUDES = -I/Users/thomashesketh/Projects/kobuki-project/Inc -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/CMSIS/Core/Include -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/BSP/STM32G4xx_Nucleo -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/STM32G4xx_HAL_Driver/Inc -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/Core/Inc -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/CMSIS/Device/ST/STM32G4xx/Include -I/Users/thomashesketh/Projects/kobuki-project/Src/Kobuki_Drivers -I/Users/thomashesketh/Projects/kobuki-project/Src/G474RE_Drivers -I/Users/thomashesketh/Projects/kobuki-project/Src/ADC -I/Users/thomashesketh/Projects/kobuki-project/Src/Ultrasonic
+  OBJECT_DIR = CMakeFiles/kobuki-project.dir
+  OBJECT_FILE_DIR = CMakeFiles/kobuki-project.dir/Src/Kobuki_Drivers
+  TARGET_SUPPORT_DIR = CMakeFiles/kobuki-project.dir
+
+build CMakeFiles/kobuki-project.dir/Src/Ultrasonic/ultrasonic.c.obj: C_COMPILER__kobuki-project_unscanned_Debug /Users/thomashesketh/Projects/kobuki-project/Src/Ultrasonic/ultrasonic.c || cmake_object_order_depends_target_kobuki-project
+  CONFIG = Debug
+  DEFINES = -DDEBUG -DRTE_DEVICE_STARTUP_STM32G4XX -DSTM32G4xx -DUSE_HAL_DRIVER
+  DEP_FILE = CMakeFiles/kobuki-project.dir/Src/Ultrasonic/ultrasonic.c.obj.d
+  FLAGS = -fdata-sections -ffunction-sections -Wl,--gc-sections -Wno-comment -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mlittle-endian -mthumb -std=gnu11 -fstack-usage -Wall -Wextra -Wpedantic -Wno-unused-parameter -O0 -g3 -ggdb
+  INCLUDES = -I/Users/thomashesketh/Projects/kobuki-project/Inc -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/CMSIS/Core/Include -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/BSP/STM32G4xx_Nucleo -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/STM32G4xx_HAL_Driver/Inc -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/Core/Inc -I/Users/thomashesketh/Projects/kobuki-project/Inc/drivers/CMSIS/Device/ST/STM32G4xx/Include -I/Users/thomashesketh/Projects/kobuki-project/Src/Kobuki_Drivers -I/Users/thomashesketh/Projects/kobuki-project/Src/G474RE_Drivers -I/Users/thomashesketh/Projects/kobuki-project/Src/ADC -I/Users/thomashesketh/Projects/kobuki-project/Src/Ultrasonic
+  OBJECT_DIR = CMakeFiles/kobuki-project.dir
+  OBJECT_FILE_DIR = CMakeFiles/kobuki-project.dir/Src/Ultrasonic
+  TARGET_SUPPORT_DIR = CMakeFiles/kobuki-project.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target kobuki-project
@@ -97,7 +137,7 @@ build CMakeFiles/kobuki-project.dir/Src/startup_stm32g474xx.S.obj: ASM_COMPILER_
 #############################################
 # Link the executable kobuki-project.elf
 
-build kobuki-project.elf: C_EXECUTABLE_LINKER__kobuki-project_Debug CMakeFiles/kobuki-project.dir/Src/syscall.c.obj CMakeFiles/kobuki-project.dir/Src/sysmem.c.obj CMakeFiles/kobuki-project.dir/Src/main.c.obj CMakeFiles/kobuki-project.dir/Src/startup_stm32g474xx.S.obj | stm32g474xe_flash.ld
+build kobuki-project.elf: C_EXECUTABLE_LINKER__kobuki-project_Debug CMakeFiles/kobuki-project.dir/Src/syscall.c.obj CMakeFiles/kobuki-project.dir/Src/sysmem.c.obj CMakeFiles/kobuki-project.dir/Src/main.c.obj CMakeFiles/kobuki-project.dir/Src/startup_stm32g474xx.S.obj CMakeFiles/kobuki-project.dir/Src/ADC/adc.c.obj CMakeFiles/kobuki-project.dir/Src/G474RE_Drivers/uart.c.obj CMakeFiles/kobuki-project.dir/Src/Kobuki_Drivers/kobuki.c.obj CMakeFiles/kobuki-project.dir/Src/Ultrasonic/ultrasonic.c.obj | stm32g474xe_flash.ld
   CONFIG = Debug
   FLAGS = -fdata-sections -ffunction-sections -Wl,--gc-sections -Wno-comment
   LINK_FLAGS = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mlittle-endian -mthumb -T/Users/thomashesketh/Projects/kobuki-project/build/Debug/stm32g474xe_flash.ld -Wl,-Map=/Users/thomashesketh/Projects/kobuki-project/build/Debug/kobuki-project.map -u _printf_float --specs=nosys.specs -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group -Wl,-z,max-page-size=8 -Wl,--print-memory-usage

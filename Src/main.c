@@ -30,7 +30,7 @@
 #define BUTTON_2_ROTATE 0x04U
 
 // Logic
-#define NULL 0
+#define FALSE 0
 #define TRUE 1
 
 // States
@@ -38,8 +38,8 @@ static enum { IDLE, SEARCH, OBSTACLE, AVOID, OBJECT } state;
 
 int main(void) {
     // Both of these only for testing purposes. Not required
-    volatile uint16_t ultrasonic_read;
-    volatile uint16_t adc_read;
+    // volatile uint16_t ultrasonic_read;
+    // volatile uint16_t adc_read;
 
     Kobuki_Typedef kobuki;
     US_Typedef object;
@@ -58,8 +58,8 @@ int main(void) {
         Ultrasonic_Detect(&object);
 
         // Both of these only for testing purposes. Not required
-        ultrasonic_read = Ultrasonic_Read();
-        adc_read = ADC_Read(ADC_CHANNEL_1);
+        // ultrasonic_read = Ultrasonic_Read();
+        // adc_read = ADC_Read(ADC_CHANNEL_1);
 
         Kobuki_Update_LEDs(led_1, led_2);
 
@@ -85,13 +85,14 @@ int main(void) {
                     // Kobuki_Drive_Distance_Setpoint(kobuki.distance, 1000);
                 }
                 else {
-                    Kobuki_Drive(STOP);
+                    // Kobuki_Drive(STOP);
+                    Kobuki_Drive(0); // STOP isnt provided anywhere so i assume this is 0
                 }
                 break;
 
             case SEARCH:
-                if ((kobuki.wheeldrop != NULL) |
-                    ((kobuki.bumper + kobuki.cliff) != NULL) |
+                if ((kobuki.wheeldrop != FALSE) |
+                    ((kobuki.bumper + kobuki.cliff) != FALSE) |
                     (kobuki.rotation_complete == TRUE) |
                     (kobuki.distance_complete == TRUE)
                 ) {

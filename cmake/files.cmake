@@ -4,6 +4,10 @@ target_sources(${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/Src/sysmem.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Src/main.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Src/startup_stm32g474xx.S"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Src/ADC/adc.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Src/G474RE_Drivers/uart.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Src/Kobuki_Drivers/kobuki.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Src/Ultrasonic/ultrasonic.c"
 )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/stm32g474xe_flash.ld" "${CMAKE_CURRENT_BINARY_DIR}" COPYONLY)
