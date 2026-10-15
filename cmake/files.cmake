@@ -10,6 +10,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/Src/Ultrasonic/ultrasonic.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Src/Pathfind/pathfind.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Src/Navigation/navigation.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Src/Decision/decision.c"
 
 )
 

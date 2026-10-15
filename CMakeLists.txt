@@ -49,6 +49,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   Src/Pathfind
   Src/ADC
   Src/Ultrasonic
+  Src/Decision
 )
 
 # Compiler options
