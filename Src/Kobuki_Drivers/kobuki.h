@@ -2,6 +2,10 @@
 
 #include <stdint.h>
 
+
+extern uint8_t rotation_complete;
+extern uint8_t distance_complete;
+
 //Kobuki structure
 typedef struct {
     uint8_t cliff;

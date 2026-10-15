@@ -34,8 +34,8 @@ static volatile int32_t setpoint_distance_tick;
 static volatile int16_t setpoint_angle_deg;
 
 /* Updated by the movement controllers we will add next. */
-static uint8_t rotation_complete = 0;
-static uint8_t distance_complete = 0;
+uint8_t rotation_complete = 0;
+uint8_t distance_complete = 0;
 
 void Kobuki_Tx(uint8_t *payload, uint8_t size_payload)
 {

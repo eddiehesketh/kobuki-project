@@ -8,6 +8,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/Src/G474RE_Drivers/uart.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Src/Kobuki_Drivers/kobuki.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Src/Ultrasonic/ultrasonic.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Src/Pathfind/pathfind.c"
 )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/stm32g474xe_flash.ld" "${CMAKE_CURRENT_BINARY_DIR}" COPYONLY)
