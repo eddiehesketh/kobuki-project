@@ -16,6 +16,7 @@
  ******************************************************************************
  */
 
+
 #include <stdint.h>
 #define STM32G474xx
 #include "stm32g4xx.h"
@@ -24,6 +25,8 @@
 #include "uart.h"
 #include "ultrasonic.h"
 #include "pathfind.h"
+#include "navigation.h"
+
 
 /* Kobuki button values */
 #define BUTTON_0_START  0x01U
@@ -44,7 +47,6 @@
 // States
 typedef enum { 
     IDLE,
-    SEARCH,
     ORIENT,
     PATHFIND,
     STORAGE,
@@ -60,16 +62,18 @@ fsm_state current_state = IDLE;
 int main() {
 
     Kobuki_Typedef kobuki;
-    US_Typedef object;
+    US_Typedef ultrasonic;
+    NavigationScan navigation_object;
     // Kobuki_LED_Enum led_1, led_2;
 
-    UART_Init();
+    UART_Init(); 
     ADC_Init();
     Ultrasonic_Init();
 
     while (1) {
 
         Kobuki_Read(&kobuki);
+        Ultrasonic_Detect(&ultrasonic);
 
         if ((kobuki.wheeldrop != 0U) || (kobuki.button == BUTTON_1_STOP)) {
             Kobuki_Drive(0);
@@ -79,7 +83,17 @@ int main() {
         }
 
         switch (current_state) {
-
+            case IDLE:
+                if (kobuki.button == BUTTON_0_START) {
+                    current_state = ORIENT;
+                    Navigation_Scan_Start(&navigation_object, kobuki.angle, ultrasonic.detected);
+                }
+                break;
+            case ORIENT:
+                if (1) { // fix this idk what to put here
+                    current_state = PATHFIND;
+                }
+                break;
             case PATHFIND:
                 if (pathfind_fsm(&kobuki)) {
                     current_state = STORAGE;
