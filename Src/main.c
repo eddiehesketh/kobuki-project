@@ -157,7 +157,13 @@ int main() {
                     current_state = ALIGN;
                 }
                 break;
+            case ALIGN:
+                break; // need to add
             case PATHFIND:
+                if (pathfind_fsm(&kobuki)) {
+                    current_state = STORAGE;
+                }
+                break;
             case STORAGE:
             case DEPOSIT:
                 /* Keep stopped until these states are connected. */
