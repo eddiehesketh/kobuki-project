@@ -48,64 +48,123 @@
 typedef enum { 
     IDLE,
     ORIENT,
+    DECISION,
     PATHFIND,
     STORAGE,
     DEPOSIT
  } fsm_state; // far more to be added
 
-
-fsm_state current_state = IDLE;
+typedef enum {
+    ORIENT_SCANNING,
+    ORIENT_TURNING
+} OrientStep;
 
 
 
 
 int main() {
+    OrientStep orient_step = ORIENT_SCANNING;
+    fsm_state current_state = IDLE;
 
     Kobuki_Typedef kobuki;
     US_Typedef ultrasonic;
     NavigationScan navigation_object;
     // Kobuki_LED_Enum led_1, led_2;
+    
+    /* Require button release before accepting another start. */
+    uint8_t start_ready = 0U;
 
     UART_Init(); 
     ADC_Init();
     Ultrasonic_Init();
 
     while (1) {
-
         Kobuki_Read(&kobuki);
         Ultrasonic_Detect(&ultrasonic);
 
-        if ((kobuki.wheeldrop != 0U) || (kobuki.button == BUTTON_1_STOP)) {
+        /* Global stop conditions take priority over the FSM. */
+        if ((kobuki.wheeldrop != 0U) ||
+            ((kobuki.button & BUTTON_1_STOP) != 0U)) {
             Kobuki_Drive(0);
-            pathfind_reset();
             current_state = IDLE;
+            start_ready = 0U;
             continue;
         }
 
         switch (current_state) {
             case IDLE:
-                if (kobuki.button == BUTTON_0_START) {
-                    current_state = ORIENT;
+                Kobuki_Drive(0);
+
+                if (kobuki.button == 0U) {
+                    start_ready = 1U;
+                }
+
+                if ((start_ready != 0U) &&
+                    ((kobuki.button & BUTTON_0_START) != 0U)) {
                     Navigation_Scan_Start(&navigation_object, kobuki.angle, ultrasonic.detected);
+                    start_ready = 0U;
+                    orient_step = ORIENT_SCANNING;
+                    current_state = ORIENT;
                 }
                 break;
+
             case ORIENT:
-                if (1) { // fix this idk what to put here
-                    current_state = PATHFIND;
+                switch (orient_step) {
+                    case ORIENT_SCANNING:
+                        Navigation_Scan_Update(
+                            &navigation_object,
+                            kobuki.angle,
+                            ultrasonic.detected
+                        );
+
+                        if (navigation_object.state == SCAN_COMPLETE) {
+                            Navigation_Orient_Start(
+                                navigation_object.midpoint
+                            );
+
+                            orient_step = ORIENT_TURNING;
+                        }
+                        else if (navigation_object.state == SCAN_FAILED) {
+                            Kobuki_Drive(0);
+                            current_state = IDLE;
+                        }
+                        break;
+
+                    case ORIENT_TURNING:
+                        if (Navigation_Orient_Update(&kobuki) != 0U) {
+                            Kobuki_Drive(0);
+                            current_state = DECISION;
+                        }
+                        break;
+
+                    default:
+                        Kobuki_Drive(0);
+                        current_state = IDLE;
+                        break;
                 }
                 break;
+
+            case DECISION:
+                /* Next: identify the bollard and select a route. */
+                Kobuki_Drive(0);
+                break;
+
             case PATHFIND:
-                if (pathfind_fsm(&kobuki)) {
-                    current_state = STORAGE;
-                }
+            case STORAGE:
+            case DEPOSIT:
+                /* Keep stopped until these states are connected. */
+                Kobuki_Drive(0);
                 break;
-            // to be added
+
             default:
+                Kobuki_Drive(0);
+                current_state = IDLE;
+                start_ready = 0U;
                 break;
-        
         }
     }
 }
+
 
 // int main(void) {
 //     // Both of these only for testing purposes. Not required
