@@ -130,10 +130,16 @@ int main() {
                 break;
             case DECISION:
                 if (Determine_Layout(ultrasonic.range_mm)) {
-                    current_state = ALIGN;
+                    Kobuki_Rotate_Angle_Setpoint(kobuki.angle, -path_angle);
+                    current_state = ALIGN; // NEED TO EXCLUDE BOLLARDS INSIDE BOX
                 }
                 break;
             case ALIGN:
+                if (!rotation_complete) {
+                    Kobuki_Rotate_Angle(kobuki.angle);
+                } else {
+                    current_state = PATHFIND;
+                }
                 break; // need to add
             case PATHFIND:
                 if (pathfind_fsm(&kobuki)) {
