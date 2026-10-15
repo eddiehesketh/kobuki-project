@@ -33,12 +33,6 @@
 #define BUTTON_1_STOP   0x02U
 #define BUTTON_2_ROTATE 0x04U
 
-#define A_ROTATION 90
-#define B_ROTATION -90
-#define A_DISTANCE_1 10000 // yet to be determined
-#define A_DISTANCE_2 10000 // yet to be determined
-#define B_DISTANCE_1 10000 // yet to be determined
-#define B_DISTANCE_2 10000 // yet to be determined
 
 // Logic
 #define FALSE 0
@@ -71,9 +65,6 @@ int main() {
     US_Typedef ultrasonic;
     NavigationScan navigation_object;
     // Kobuki_LED_Enum led_1, led_2;
-    
-    /* Require button release before accepting another start. */
-    uint8_t start_ready = 0U;
 
     UART_Init(); 
     ADC_Init();
@@ -88,7 +79,6 @@ int main() {
             ((kobuki.button & BUTTON_1_STOP) != 0U)) {
             Kobuki_Drive(0);
             current_state = IDLE;
-            start_ready = 0U;
             continue;
         }
 
@@ -96,14 +86,8 @@ int main() {
             case IDLE:
                 Kobuki_Drive(0);
 
-                if (kobuki.button == 0U) {
-                    start_ready = 1U;
-                }
-
-                if ((start_ready != 0U) &&
-                    ((kobuki.button & BUTTON_0_START) != 0U)) {
+                if (kobuki.button == BUTTON_0_START) {
                     Navigation_Scan_Start(&navigation_object, kobuki.angle, ultrasonic.detected);
-                    start_ready = 0U;
                     orient_step = ORIENT_SCANNING;
                     current_state = ORIENT;
                 }
@@ -145,15 +129,7 @@ int main() {
                 }
                 break;
             case DECISION:
-                if (LayoutA(ultrasonic.range_mm)) {
-                    path_angle = A_ROTATION;
-                    path_first_drive_distance = A_DISTANCE_1;
-                    path_second_drive_distance = A_DISTANCE_2;
-                    current_state = ALIGN;
-                } else if (LayoutB(ultrasonic.range_mm)) {
-                    path_angle = B_ROTATION;
-                    path_first_drive_distance = B_DISTANCE_1;
-                    path_second_drive_distance = B_DISTANCE_2;
+                if (Determine_Layout(ultrasonic.range_mm)) {
                     current_state = ALIGN;
                 }
                 break;
@@ -173,7 +149,6 @@ int main() {
             default:
                 Kobuki_Drive(0);
                 current_state = IDLE;
-                start_ready = 0U;
                 break;
         }
     }

@@ -1,5 +1,6 @@
 #include "navigation.h"
 #include "kobuki.h"
+
 #define SCAN_SPEED_MM_S ((int16_t)75)
 
 int16_t Navigation_Midpoint(int16_t first_angle, int16_t second_angle)
