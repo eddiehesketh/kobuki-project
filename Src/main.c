@@ -26,7 +26,7 @@
 #include "ultrasonic.h"
 #include "pathfind.h"
 #include "navigation.h"
-
+#include "decision.h"
 
 /* Kobuki button values */
 #define BUTTON_0_START  0x01U
@@ -49,6 +49,7 @@ typedef enum {
     IDLE,
     ORIENT,
     DECISION,
+    ALIGN,
     PATHFIND,
     STORAGE,
     DEPOSIT
@@ -143,13 +144,26 @@ int main() {
                         break;
                 }
                 break;
-
             case DECISION:
-                /* Next: identify the bollard and select a route. */
-                Kobuki_Drive(0);
+                if (LayoutA(ultrasonic.range_mm)) {
+                    path_angle = A_ROTATION;
+                    path_first_drive_distance = A_DISTANCE_1;
+                    path_second_drive_distance = A_DISTANCE_2;
+                    current_state = ALIGN;
+                } else if (LayoutB(ultrasonic.range_mm)) {
+                    path_angle = B_ROTATION;
+                    path_first_drive_distance = B_DISTANCE_1;
+                    path_second_drive_distance = B_DISTANCE_2;
+                    current_state = ALIGN;
+                }
                 break;
-
+            case ALIGN:
+                break; // need to add
             case PATHFIND:
+                if (pathfind_fsm(&kobuki)) {
+                    current_state = STORAGE;
+                }
+                break;
             case STORAGE:
             case DEPOSIT:
                 /* Keep stopped until these states are connected. */
