@@ -45,6 +45,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   Inc/drivers/CMSIS/Device/ST/STM32G4xx/Include
   Src/Kobuki_Drivers
   Src/G474RE_Drivers
+  Src/Pathfind
   Src/ADC
   Src/Ultrasonic
 )

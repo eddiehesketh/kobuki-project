@@ -16,7 +16,6 @@
  ******************************************************************************
  */
 
-#include "Pathfind/pathfind.h"
 #include <stdint.h>
 #define STM32G474xx
 #include "stm32g4xx.h"
@@ -24,6 +23,7 @@
 #include "kobuki.h"
 #include "uart.h"
 #include "ultrasonic.h"
+#include "pathfind.h"
 
 /* Kobuki button values */
 #define BUTTON_0_START  0x01U
