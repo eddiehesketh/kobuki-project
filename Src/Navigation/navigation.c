@@ -74,13 +74,16 @@ void Navigation_Scan_Update(NavigationScan *scan, int16_t current_angle, uint8_t
 
     switch (scan->state) {
         case CLEAR_OBJECT:
+        // waits till the object has left then changes the state to finding the angle number 1
             if (detected == 0U) {
                 scan->state = FIND_ANGLE_1;
+                // Reset the rotation counter so the new scan step gets its own angle limit.
                 scan->swept_angle = 0;
             }
             break;
 
        case FIND_ANGLE_1:
+       // Starts recording the angle once it has found the object
             if (detected != 0U) {
                 // Save the heading where detection begins
                 scan->angle1 = current_angle;
@@ -89,10 +92,10 @@ void Navigation_Scan_Update(NavigationScan *scan, int16_t current_angle, uint8_t
             }
             break;
         case FIND_ANGLE_2:
+        // finishes recording once the object leaves the detection zone
             if (detected == 0U) {
                 scan->angle2 = current_angle;
                 scan->midpoint = Navigation_Midpoint(scan->angle1, scan->angle2);
-                
                 scan->state = SCAN_COMPLETE;
                 Kobuki_Rotate(0);
                 return;
@@ -107,6 +110,24 @@ void Navigation_Scan_Update(NavigationScan *scan, int16_t current_angle, uint8_t
    }
    // Continue scanning
    Kobuki_Rotate(SCAN_SPEED_MM_S);
+}
+
+// Call once after a successful scan to select the centre heading
+void Navigation_Orient_Start(int16_t target_angle) // e.g target angle will be our midpt so pass scan.midpoint
+{
+    Kobuki_Rotate_Angle_Setpoint(target_angle, 0); // Stores the rotation target as target_angle + 0°
+}
+
+// Call each main-loop cycle; return 1 when orientation is complete
+uint8_t Navigation_Orient_Update(const Kobuki_Typedef *kobuki)
+{
+    if (kobuki->rotation_complete != 0U) {
+        Kobuki_Rotate(0);
+        return 1U;
+    }
+
+    Kobuki_Rotate_Angle(kobuki->angle);
+    return 0U;
 }
 
 ///// THIS CODE WILL GO IN THE MAIN FSM FOR SEARCHING BIT when 

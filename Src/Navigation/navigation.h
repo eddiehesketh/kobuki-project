@@ -1,4 +1,5 @@
 #pragma once
+#include "kobuki.h"
 #include <stdint.h>
 
 
@@ -28,3 +29,7 @@ int16_t Navigation_Midpoint(int16_t first_angle, int16_t second_angle);
 void Navigation_Scan_Start(NavigationScan *scan, int16_t current_angle, uint8_t detected);
 /// Update the current navigation scan.
 void Navigation_Scan_Update(NavigationScan *scan, int16_t current_angle, uint8_t detected);
+// Return back to the midpt of the bollard
+void Navigation_Orient_Start(int16_t target_angle);
+// Update the current orientation.
+uint8_t Navigation_Orient_Update(const Kobuki_Typedef *kobuki);
