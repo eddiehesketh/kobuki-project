@@ -34,87 +34,121 @@
 #define TRUE 1
 
 // States
-static enum { IDLE, SEARCH, OBSTACLE, AVOID, OBJECT } state;
+static enum { IDLE, SEARCH, OBSTACLE, AVOID, OBJECT } state; // far more to be added
 
-int main(void) {
-    // Both of these only for testing purposes. Not required
-    // volatile uint16_t ultrasonic_read;
-    // volatile uint16_t adc_read;
+
+
+int main() {
 
     Kobuki_Typedef kobuki;
     US_Typedef object;
-    Kobuki_LED_Enum led_1, led_2;
+    // Kobuki_LED_Enum led_1, led_2;
 
     UART_Init();
     ADC_Init();
     Ultrasonic_Init();
 
-    state = IDLE;
-    led_1 = OFF;
-    led_2 = OFF;
-
-    // adding this comment on my branch
 
     while (1) {
+
         Kobuki_Read(&kobuki);
-        Ultrasonic_Detect(&object);
 
-        // Both of these only for testing purposes. Not required
-        // ultrasonic_read = Ultrasonic_Read();
-        // adc_read = ADC_Read(ADC_CHANNEL_1);
+        if ((kobuki.wheeldrop != 0U) || (kobuki.button == BUTTON_1_STOP)) {
+            Kobuki_Drive(0);
+            state = IDLE;
+            continue;
+        }
 
-        Kobuki_Update_LEDs(led_1, led_2);
-
-        // A TEST FSM
         switch (state) {
-            case IDLE:
-                if (kobuki.button == BUTTON_0_START) {
-                    state = SEARCH;
-                    led_1 = RED;
-                    Kobuki_Rotate_Angle_Setpoint(kobuki.angle, 450);
-                    // Kobuki_Drive_Distance_Setpoint(kobuki.distance, 100);
-                }
-                else if (kobuki.button == BUTTON_1_STOP) {
-                    state = SEARCH;
-                    led_1 = RED;
-                    Kobuki_Rotate_Angle_Setpoint(kobuki.angle, 270);
-                    // Kobuki_Drive_Distance_Setpoint(kobuki.distance, -100);
-                }
-                else if (kobuki.button == BUTTON_2_ROTATE) {
-                    state = SEARCH;
-                    led_1 = RED;
-                    Kobuki_Rotate_Angle_Setpoint(kobuki.angle, 90);
-                    // Kobuki_Drive_Distance_Setpoint(kobuki.distance, 1000);
-                }
-                else {
-                    // Kobuki_Drive(STOP);
-                    Kobuki_Drive(0); // STOP isnt provided anywhere so i assume this is 0
-                }
+            // to be added
+            default:
                 break;
-
-            case SEARCH:
-                if ((kobuki.wheeldrop != FALSE) |
-                    ((kobuki.bumper + kobuki.cliff) != FALSE) |
-                    (kobuki.rotation_complete == TRUE) |
-                    (kobuki.distance_complete == TRUE)
-                ) {
-                    state = IDLE;
-                    led_1 = YELLOW;
-                }
-                else {
-                    Kobuki_Rotate_Angle(kobuki.angle);
-                    // Kobuki_Drive_Distance(kobuki.distance);
-                }
-                break;
-
-            case OBSTACLE:
-                break;
-
-            case AVOID:
-                break;
-
-            case OBJECT:
-                break;
+        
         }
     }
 }
+
+// int main(void) {
+//     // Both of these only for testing purposes. Not required
+//     // volatile uint16_t ultrasonic_read;
+//     // volatile uint16_t adc_read;
+
+    // Kobuki_Typedef kobuki;
+    // US_Typedef object;
+    // Kobuki_LED_Enum led_1, led_2;
+
+    // UART_Init();
+    // ADC_Init();
+    // Ultrasonic_Init();
+
+
+
+//     state = IDLE;
+//     led_1 = OFF;
+//     led_2 = OFF;
+
+//     // adding this comment on my branch
+
+//     while (1) {
+//         Kobuki_Read(&kobuki);
+//         Ultrasonic_Detect(&object);
+
+//         // Both of these only for testing purposes. Not required
+//         // ultrasonic_read = Ultrasonic_Read();
+//         // adc_read = ADC_Read(ADC_CHANNEL_1);
+
+//         Kobuki_Update_LEDs(led_1, led_2);
+
+//         // A TEST FSM
+//         switch (state) {
+//             case IDLE:
+//                 if (kobuki.button == BUTTON_0_START) {
+//                     state = SEARCH;
+//                     led_1 = RED;
+//                     Kobuki_Rotate_Angle_Setpoint(kobuki.angle, 450);
+//                     // Kobuki_Drive_Distance_Setpoint(kobuki.distance, 100);
+//                 }
+//                 else if (kobuki.button == BUTTON_1_STOP) {
+//                     state = SEARCH;
+//                     led_1 = RED;
+//                     Kobuki_Rotate_Angle_Setpoint(kobuki.angle, 270);
+//                     // Kobuki_Drive_Distance_Setpoint(kobuki.distance, -100);
+//                 }
+//                 else if (kobuki.button == BUTTON_2_ROTATE) {
+//                     state = SEARCH;
+//                     led_1 = RED;
+//                     Kobuki_Rotate_Angle_Setpoint(kobuki.angle, 90);
+//                     // Kobuki_Drive_Distance_Setpoint(kobuki.distance, 1000);
+//                 }
+//                 else {
+//                     // Kobuki_Drive(STOP);
+//                     Kobuki_Drive(0); // STOP isnt provided anywhere so i assume this is 0
+//                 }
+//                 break;
+
+//             case SEARCH:
+//                 if ((kobuki.wheeldrop != FALSE) |
+//                     ((kobuki.bumper + kobuki.cliff) != FALSE) |
+//                     (kobuki.rotation_complete == TRUE) |
+//                     (kobuki.distance_complete == TRUE)
+//                 ) {
+//                     state = IDLE;
+//                     led_1 = YELLOW;
+//                 }
+//                 else {
+//                     Kobuki_Rotate_Angle(kobuki.angle);
+//                     // Kobuki_Drive_Distance(kobuki.distance);
+//                 }
+//                 break;
+
+//             case OBSTACLE:
+//                 break;
+
+//             case AVOID:
+//                 break;
+
+//             case OBJECT:
+//                 break;
+//         }
+//     }
+// }

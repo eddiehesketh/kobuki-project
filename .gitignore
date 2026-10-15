@@ -54,10 +54,6 @@ dkms.conf
 # debug information files
 *.dwo
 
-build/Debug/.ninja_deps
-build/Debug/.ninja_log
-build/Debug/build.ninja
+# CMake configure and build output
+build/
 
-
-# directories
-build/Debug/.cache/clangd/index/
