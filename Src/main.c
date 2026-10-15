@@ -16,6 +16,7 @@
  ******************************************************************************
  */
 
+#include "Pathfind/pathfind.h"
 #include <stdint.h>
 #define STM32G474xx
 #include "stm32g4xx.h"
@@ -29,12 +30,30 @@
 #define BUTTON_1_STOP   0x02U
 #define BUTTON_2_ROTATE 0x04U
 
+#define A_ROTATION 90
+#define B_ROTATION -90
+#define A_DISTANCE_1 10000 // yet to be determined
+#define A_DISTANCE_2 10000 // yet to be determined
+#define B_DISTANCE_1 10000 // yet to be determined
+#define B_DISTANCE_2 10000 // yet to be determined
+
 // Logic
 #define FALSE 0
 #define TRUE 1
 
 // States
-static enum { IDLE, SEARCH, OBSTACLE, AVOID, OBJECT } state; // far more to be added
+typedef enum { 
+    IDLE,
+    SEARCH,
+    ORIENT,
+    PATHFIND,
+    STORAGE,
+    DEPOSIT
+ } fsm_state; // far more to be added
+
+
+fsm_state current_state = IDLE;
+
 
 
 
@@ -48,18 +67,24 @@ int main() {
     ADC_Init();
     Ultrasonic_Init();
 
-
     while (1) {
 
         Kobuki_Read(&kobuki);
 
         if ((kobuki.wheeldrop != 0U) || (kobuki.button == BUTTON_1_STOP)) {
             Kobuki_Drive(0);
-            state = IDLE;
+            pathfind_reset();
+            current_state = IDLE;
             continue;
         }
 
-        switch (state) {
+        switch (current_state) {
+
+            case PATHFIND:
+                if (pathfind_fsm(&kobuki)) {
+                    current_state = STORAGE;
+                }
+                break;
             // to be added
             default:
                 break;
