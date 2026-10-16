@@ -26,12 +26,20 @@
 #include "ultrasonic.h"
 #include "pathfind.h"
 #include "navigation.h"
+#include "orient.h"
 #include "decision.h"
 
 /* Kobuki button values */
 #define BUTTON_0_START  0x01U
 #define BUTTON_1_STOP   0x02U
 #define BUTTON_2_ROTATE 0x04U
+
+/* Ignore scan detections farther than the near bollards. */
+#define ORIENT_MAX_RANGE_MM 900
+#define STORAGE_MAX_RANGE_MM 400
+
+#define FINISHING_DISTANCE 9
+
 
 
 // Logic
@@ -49,16 +57,7 @@ typedef enum {
     DEPOSIT
  } fsm_state; // far more to be added
 
-typedef enum {
-    ORIENT_SCANNING,
-    ORIENT_TURNING
-} OrientStep;
-
-
-
-
 int main() {
-    OrientStep orient_step = ORIENT_SCANNING;
     fsm_state current_state = IDLE;
 
     Kobuki_Typedef kobuki;
@@ -87,47 +86,21 @@ int main() {
                 Kobuki_Drive(0);
 
                 if (kobuki.button == BUTTON_0_START) {
-                    Navigation_Scan_Start(&navigation_object, kobuki.angle, ultrasonic.detected);
-                    orient_step = ORIENT_SCANNING;
                     current_state = ORIENT;
                 }
                 break;
 
-            case ORIENT:
-                switch (orient_step) {
-                    case ORIENT_SCANNING:
-                        Navigation_Scan_Update(
-                            &navigation_object,
-                            kobuki.angle,
-                            ultrasonic.detected
-                        );
+            case ORIENT: {
+                uint8_t orient_result = orient_fsm(&kobuki, &ultrasonic, &navigation_object, ORIENT_MAX_RANGE_MM);
 
-                        if (navigation_object.state == SCAN_COMPLETE) {
-                            Navigation_Orient_Start(
-                                navigation_object.midpoint
-                            );
-
-                            orient_step = ORIENT_TURNING;
-                        }
-                        else if (navigation_object.state == SCAN_FAILED) {
-                            Kobuki_Drive(0);
-                            current_state = IDLE;
-                        }
-                        break;
-
-                    case ORIENT_TURNING:
-                        if (Navigation_Orient_Update(&kobuki) != 0U) {
-                            Kobuki_Drive(0);
-                            current_state = DECISION;
-                        }
-                        break;
-
-                    default:
-                        Kobuki_Drive(0);
-                        current_state = IDLE;
-                        break;
+                if (orient_result == 1U) {
+                    current_state = DECISION;
+                }
+                else if (orient_result == 2U) {
+                    current_state = IDLE;
                 }
                 break;
+            }
             case DECISION:
                 if (Determine_Layout(ultrasonic.range_mm)) {
                     Kobuki_Rotate_Angle_Setpoint(kobuki.angle, -path_first_angle);
@@ -146,10 +119,25 @@ int main() {
                     current_state = STORAGE;
                 }
                 break;
-            case STORAGE:
+            case STORAGE: {
+                uint8_t orient_result = orient_fsm(&kobuki, &ultrasonic, &navigation_object, STORAGE_MAX_RANGE_MM);
+
+                if (orient_result == 1U) {
+                    Kobuki_Drive_Distance_Setpoint(kobuki.distance, ultrasonic.range_mm - FINISHING_DISTANCE);
+                    current_state = DEPOSIT;
+                }
+                else if (orient_result == 2U) {
+                    current_state = IDLE;
+                }
+                break;
+            }
             case DEPOSIT:
-                /* Keep stopped until these states are connected. */
-                Kobuki_Drive(0);
+                if (!distance_complete) {
+                    Kobuki_Drive_Distance(kobuki.distance);
+                } else {
+                    Kobuki_Drive(0);
+                    current_state = IDLE;
+                }
                 break;
 
             default:
