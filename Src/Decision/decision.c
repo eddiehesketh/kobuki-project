@@ -6,12 +6,12 @@
 
 #define A_ROTATION_1 90
 #define B_ROTATION_1 -90
-#define A_ROTATION_2 135 // yet to be determined
-#define B_ROTATION_2 -135 // yet to be determined
-#define A_DISTANCE_1 10000 // yet to be determined
-#define A_DISTANCE_2 10000 // yet to be determined
-#define B_DISTANCE_1 10000 // yet to be determined
-#define B_DISTANCE_2 10000 // yet to be determined
+#define A_ROTATION_2 135 
+#define B_ROTATION_2 -135 
+#define A_DISTANCE_1 1200
+#define A_DISTANCE_2 1400
+#define B_DISTANCE_1 1400
+#define B_DISTANCE_2 1200
 #define THIRD_DISTANCE 920
 
 Layout grid_layout;
