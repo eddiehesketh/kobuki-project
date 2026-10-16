@@ -1,9 +1,13 @@
 #include "pathfind.h"
+#include "kobuki.h"
 
 pathfind_state path_state = PATH_IDLE;
-int16_t path_angle = 0;
+int16_t path_first_angle = 0;
+int16_t path_second_angle = 0;
 uint16_t path_first_drive_distance = 0;
 uint16_t path_second_drive_distance = 0;
+uint16_t path_third_drive_distance = 0;
+
 
 void pathfind_reset(void)
 {
@@ -21,11 +25,11 @@ uint8_t pathfind_fsm(Kobuki_Typedef *kobuki)
             if (!distance_complete) {
                 Kobuki_Drive_Distance(kobuki->distance);
             } else {
-                Kobuki_Rotate_Angle_Setpoint(kobuki->angle, path_angle);
-                path_state = MID_ROTATE;
+                Kobuki_Rotate_Angle_Setpoint(kobuki->angle, path_first_angle);
+                path_state = FIRST_ROTATE;
             }
             break;
-        case MID_ROTATE:
+        case FIRST_ROTATE:
             if (!rotation_complete) {
                 Kobuki_Rotate_Angle(kobuki->angle);
             } else {
@@ -37,7 +41,22 @@ uint8_t pathfind_fsm(Kobuki_Typedef *kobuki)
             if (!distance_complete) {
                 Kobuki_Drive_Distance(kobuki->distance);
             } else {
-                // will work out what angle to rotate to here.
+                Kobuki_Rotate_Angle_Setpoint(kobuki->angle, path_second_angle);
+                path_state = SECOND_ROTATE;
+            }
+            break;
+        case SECOND_ROTATE:
+            if (!rotation_complete) {
+                Kobuki_Rotate_Angle(kobuki->angle);
+            } else {
+                Kobuki_Drive_Distance_Setpoint(kobuki->distance, path_third_drive_distance);
+                path_state = THIRD_DRIVE;
+            }
+            break;
+        case THIRD_DRIVE:
+            if (!distance_complete) {
+                Kobuki_Drive_Distance(kobuki->distance);
+            } else {
                 path_state = PATH_IDLE;
                 return 1;
             }

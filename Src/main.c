@@ -130,7 +130,7 @@ int main() {
                 break;
             case DECISION:
                 if (Determine_Layout(ultrasonic.range_mm)) {
-                    Kobuki_Rotate_Angle_Setpoint(kobuki.angle, -path_angle);
+                    Kobuki_Rotate_Angle_Setpoint(kobuki.angle, -path_first_angle);
                     current_state = ALIGN; // NEED TO EXCLUDE BOLLARDS INSIDE BOX
                 }
                 break;
