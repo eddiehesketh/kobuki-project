@@ -60,8 +60,8 @@ typedef enum {
 int main() {
     fsm_state current_state = IDLE;
 
-    Kobuki_Typedef kobuki;
-    US_Typedef ultrasonic;
+    Kobuki_Typedef kobuki = {0};
+    US_Typedef ultrasonic = {0};
     NavigationScan navigation_object;
     // Kobuki_LED_Enum led_1, led_2;
 
@@ -77,6 +77,8 @@ int main() {
         if ((kobuki.wheeldrop != 0U) ||
             ((kobuki.button & BUTTON_1_STOP) != 0U)) {
             Kobuki_Drive(0);
+            pathfind_reset();
+            orient_step = ORIENT_IDLE;
             current_state = IDLE;
             continue;
         }
@@ -84,6 +86,8 @@ int main() {
         switch (current_state) {
             case IDLE:
                 Kobuki_Drive(0);
+                pathfind_reset();
+                orient_step = ORIENT_IDLE;
 
                 if (kobuki.button == BUTTON_0_START) {
                     current_state = ORIENT;
