@@ -38,7 +38,7 @@
 #define ORIENT_MAX_RANGE_MM 900
 #define STORAGE_MAX_RANGE_MM 400
 
-#define FINISHING_DISTANCE 9
+#define FINISHING_DISTANCE 90
 
 
 
@@ -123,7 +123,7 @@ int main() {
                 uint8_t orient_result = orient_fsm(&kobuki, &ultrasonic, &navigation_object, STORAGE_MAX_RANGE_MM);
 
                 if (orient_result == 1U) {
-                    Kobuki_Drive_Distance_Setpoint(kobuki.distance, ultrasonic.range_mm - FINISHING_DISTANCE);
+                    Kobuki_Drive_Distance_Setpoint(kobuki.distance, ultrasonic.range_mm - SENSOR_DISTANCE - FINISHING_DISTANCE);
                     current_state = DEPOSIT;
                 }
                 else if (orient_result == 2U) {
