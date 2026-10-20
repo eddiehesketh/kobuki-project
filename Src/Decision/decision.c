@@ -2,7 +2,7 @@
 
 #define BOLLARD_A1_DISTANCE 375
 #define BOLLARD_B1_DISTANCE 225
-#define NOISE 50
+#define NOISE 100
 
 #define A_ROTATION_1 90
 #define B_ROTATION_1 -90

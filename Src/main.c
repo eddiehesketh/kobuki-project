@@ -35,7 +35,7 @@
 #define BUTTON_2_ROTATE 0x04U
 
 /* Ignore scan detections farther than the near bollards. */
-#define ORIENT_MAX_RANGE_MM 900
+#define ORIENT_MAX_RANGE_MM 750
 #define STORAGE_MAX_RANGE_MM 400
 
 #define FINISHING_DISTANCE 90
