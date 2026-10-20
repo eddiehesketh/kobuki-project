@@ -3,6 +3,18 @@
 
 #define SCAN_SPEED_MM_S ((int16_t)75)
 
+/* Readings in a row needed before an edge is accepted (filters ultrasonic flicker
+   at the edge of the beam). At ~50 Hz loop rate 3 samples = ~60 ms. */
+#define SCAN_DEBOUNCE_SAMPLES ((uint8_t)3U)
+
+/* The MB1043 analog output lags the real world (~100-200 ms: 10 Hz ranging plus
+   internal filtering). Both edges are therefore recorded late, so the midpoint
+   lands past the bollard in the scan direction (CCW, since SCAN_SPEED_MM_S > 0).
+   At 75 mm/s wheel speed the Kobuki turns ~37 deg/s, so 150 ms ~= 5.5 deg.
+   Units: 1/100 deg. Tune on the robot: put a bollard dead ahead, run ORIENT,
+   read how far past it the robot ends up, and set this to that error. */
+#define SCAN_LAG_COMP_CENTIDEG ((int32_t)550)
+
 int16_t Navigation_Midpoint(int16_t first_angle, int16_t second_angle)
 {
     int32_t difference = (int32_t)second_angle - first_angle;
@@ -35,6 +47,8 @@ void Navigation_Scan_Start(NavigationScan *scan, int16_t current_angle, uint8_t 
     scan->midpoint = 0;
     scan->previous_angle = current_angle;
     scan->swept_angle = 0;
+    scan->run_count = 0U;
+    scan->run_start_angle = current_angle;
 
     // If already seeing an object, first find a clear path/direction
     scan->state = (detected != 0U) ? CLEAR_OBJECT : FIND_ANGLE_1;
@@ -84,22 +98,52 @@ void Navigation_Scan_Update(NavigationScan *scan, int16_t current_angle, uint8_t
             break;
 
        case FIND_ANGLE_1:
-       // Starts recording the angle once it has found the object
+       // Starts recording the angle once it has (reliably) found the object
             if (detected != 0U) {
-                // Save the heading where detection begins
-                scan->angle1 = current_angle;
-                scan->state = FIND_ANGLE_2;
-                scan->swept_angle = 0;
+                if (scan->run_count == 0U) {
+                    scan->run_start_angle = current_angle; // first sample of the run
+                }
+                scan->run_count++;
+                if (scan->run_count >= SCAN_DEBOUNCE_SAMPLES) {
+                    // Save the heading where detection began, not where it was confirmed
+                    scan->angle1 = scan->run_start_angle;
+                    scan->state = FIND_ANGLE_2;
+                    scan->swept_angle = 0;
+                    scan->run_count = 0U;
+                }
+            }
+            else {
+                scan->run_count = 0U; // one-off blip, ignore it
             }
             break;
         case FIND_ANGLE_2:
-        // finishes recording once the object leaves the detection zone
+        // finishes recording once the object has (reliably) left the detection zone
             if (detected == 0U) {
-                scan->angle2 = current_angle;
-                scan->midpoint = Navigation_Midpoint(scan->angle1, scan->angle2);
-                scan->state = SCAN_COMPLETE;
-                Kobuki_Rotate(0);
-                return;
+                if (scan->run_count == 0U) {
+                    scan->run_start_angle = current_angle;
+                }
+                scan->run_count++;
+                if (scan->run_count >= SCAN_DEBOUNCE_SAMPLES) {
+                    scan->angle2 = scan->run_start_angle;
+                    int32_t mid = Navigation_Midpoint(scan->angle1, scan->angle2);
+
+                    // Undo the sensor lag: shift back against the scan direction.
+                    mid += (SCAN_SPEED_MM_S >= 0) ? -SCAN_LAG_COMP_CENTIDEG : SCAN_LAG_COMP_CENTIDEG;
+                    if (mid >= 18000) {
+                        mid -= 36000;
+                    }
+                    else if (mid < -18000) {
+                        mid += 36000;
+                    }
+
+                    scan->midpoint = (int16_t)mid;
+                    scan->state = SCAN_COMPLETE;
+                    Kobuki_Rotate(0);
+                    return;
+                }
+            }
+            else {
+                scan->run_count = 0U; // dropout mid-bollard, keep going
             }
             break;
 

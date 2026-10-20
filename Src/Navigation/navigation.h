@@ -20,6 +20,11 @@ typedef struct {
 
     int16_t previous_angle;
     int32_t swept_angle;
+
+    /* Debounce: an edge only counts after SCAN_DEBOUNCE_SAMPLES readings in a row
+       agree, and the angle saved is the one from the FIRST of those readings. */
+    uint8_t run_count;
+    int16_t run_start_angle;
 } NavigationScan;
 
 
