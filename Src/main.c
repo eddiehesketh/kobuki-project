@@ -59,6 +59,37 @@ typedef enum {
     DEPOSIT
  } fsm_state; // far more to be added
 
+// int main() {
+
+
+//     Kobuki_Typedef kobuki = {0};
+//     US_Typedef ultrasonic = {0};
+//     // NavigationScan navigation_object;
+//     // Kobuki_LED_Enum led_1, led_2;
+
+//     UART_Init(); 
+//     ADC_Init();
+//     Ultrasonic_Init();
+
+//     while (1) {
+//         Kobuki_Read(&kobuki);
+//         Ultrasonic_Detect(&ultrasonic);
+
+//         /* Global stop conditions take priority over the FSM. */
+//         if ((kobuki.wheeldrop != 0U) ||
+//             ((kobuki.button & BUTTON_1_STOP) != 0U)) {
+//             Kobuki_Drive(0);
+//             pathfind_reset();
+//             // orient_step = ORIENT_IDLE;
+//             // current_state = IDLE;
+//             continue;
+//         }
+
+
+// }
+// }
+
+
 int main() {
     fsm_state current_state = IDLE;
 
@@ -157,5 +188,3 @@ int main() {
         }
     }
 }
-
-

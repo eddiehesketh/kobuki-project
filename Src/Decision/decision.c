@@ -12,18 +12,20 @@
 #define B_DISTANCE_2 1200
 #define THIRD_DISTANCE 920
 #define BUFFER 100
-#define A_BUFFER 80
+#define A_BUFFER 35
 
 Layout grid_layout;
 
 
-#define BOLLARD_A1_DISTANCE (375 + BUFFER + A_BUFFER)
+#define BOLLARD_A1_DISTANCE (375 + A_BUFFER)
 #define BOLLARD_B1_DISTANCE (225 + BUFFER)
 #define NOISE 100
 
 /* Expected sensor readings: A = 595 mm, B = 445 mm */
 #define EXPECTED_A (BOLLARD_A1_DISTANCE + SENSOR_DISTANCE)
-#define EXPECTED_B (BOLLARD_B1_DISTANCE + SENSOR_DISTANCE)
+// #define EXPECTED_B (BOLLARD_B1_DISTANCE + SENSOR_DISTANCE)
+#define EXPECTED_B (620)
+
 #define LAYOUT_SPLIT ((EXPECTED_A + EXPECTED_B) / 2)   /* 520 mm */
 
 static uint8_t LayoutA(uint16_t distance) {
