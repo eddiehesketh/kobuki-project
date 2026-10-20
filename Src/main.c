@@ -36,7 +36,9 @@
 
 /* Ignore scan detections farther than the near bollards. */
 #define ORIENT_MAX_RANGE_MM 750
-#define STORAGE_MAX_RANGE_MM 400
+/* Front edge of robot to final bollard when THIRD_DRIVE ends. MEASURE THIS. */
+#define FINAL_BOLLARD_GAP_MM 300
+#define STORAGE_MAX_RANGE_MM (FINAL_BOLLARD_GAP_MM + SENSOR_DISTANCE + 100)   /* 620 mm */
 
 #define FINISHING_DISTANCE 90
 
@@ -127,7 +129,11 @@ int main() {
                 uint8_t orient_result = orient_fsm(&kobuki, &ultrasonic, &navigation_object, STORAGE_MAX_RANGE_MM);
 
                 if (orient_result == 1U) {
-                    Kobuki_Drive_Distance_Setpoint(kobuki.distance, ultrasonic.range_mm - SENSOR_DISTANCE - FINISHING_DISTANCE);
+                    int16_t approach = (int16_t)ultrasonic.range_mm - SENSOR_DISTANCE - FINISHING_DISTANCE;
+                    if (approach < 0) {
+                        approach = 0;
+                    }
+                    Kobuki_Drive_Distance_Setpoint(kobuki.distance, approach);
                     current_state = DEPOSIT;
                 }
                 else if (orient_result == 2U) {
