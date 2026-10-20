@@ -2,6 +2,7 @@
 #include "kobuki.h"
 
 pathfind_state path_state = PATH_IDLE;
+int16_t path_orient_angle = 0;
 int16_t path_first_angle = 0;
 int16_t path_second_angle = 0;
 uint16_t path_first_drive_distance = 0;

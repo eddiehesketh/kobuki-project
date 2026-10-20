@@ -1,8 +1,9 @@
 #include "decision.h"
 
-
+#define B_ORIENT_ANGLE 83
+#define A_ORIENT_ANGLE -83
 #define A_ROTATION_1 90
-#define B_ROTATION_1 -90
+#define B_ROTATION_1 -95 // subject to change
 #define A_ROTATION_2 135  
 #define B_ROTATION_2 -135 
 #define A_DISTANCE_1 1200
@@ -10,11 +11,14 @@
 #define B_DISTANCE_1 1400
 #define B_DISTANCE_2 1200
 #define THIRD_DISTANCE 920
+#define BUFFER 100
+#define A_BUFFER 80
 
 Layout grid_layout;
 
-#define BOLLARD_A1_DISTANCE 375
-#define BOLLARD_B1_DISTANCE 225
+
+#define BOLLARD_A1_DISTANCE (375 + BUFFER + A_BUFFER)
+#define BOLLARD_B1_DISTANCE (225 + BUFFER)
 #define NOISE 100
 
 /* Expected sensor readings: A = 595 mm, B = 445 mm */
@@ -35,6 +39,7 @@ static uint8_t LayoutB(uint16_t distance) {
 
 uint8_t Determine_Layout(uint16_t distance) {
     if (LayoutA(distance)) {
+        path_orient_angle = A_ORIENT_ANGLE;
         path_first_angle = A_ROTATION_1;
         path_second_angle = A_ROTATION_2;
         path_first_drive_distance = A_DISTANCE_1;
@@ -43,6 +48,7 @@ uint8_t Determine_Layout(uint16_t distance) {
         grid_layout = PATH_A;
         return 1;
     } else if (LayoutB(distance)) {
+        path_orient_angle = B_ORIENT_ANGLE;
         path_first_angle = B_ROTATION_1;
         path_second_angle = B_ROTATION_2;
         path_first_drive_distance = B_DISTANCE_1;

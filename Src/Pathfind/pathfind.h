@@ -2,6 +2,7 @@
 
 #include "kobuki.h"
 
+extern int16_t path_orient_angle;
 extern int16_t path_first_angle;
 extern int16_t path_second_angle;
 extern uint16_t path_first_drive_distance;

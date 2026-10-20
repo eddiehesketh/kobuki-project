@@ -40,7 +40,7 @@
 #define FINAL_BOLLARD_GAP_MM 300
 #define STORAGE_MAX_RANGE_MM (FINAL_BOLLARD_GAP_MM + SENSOR_DISTANCE + 100)   /* 620 mm */
 
-#define FINISHING_DISTANCE 90
+#define FINISHING_DISTANCE 150
 
 
 
@@ -109,7 +109,7 @@ int main() {
             }
             case DECISION:
                 if (Determine_Layout(ultrasonic.range_mm)) {
-                    Kobuki_Rotate_Angle_Setpoint(kobuki.angle, -path_first_angle);
+                    Kobuki_Rotate_Angle_Setpoint(kobuki.angle, path_orient_angle); // hard coding this for now, will need to be changed to a variable based on the layout
                     current_state = ALIGN; // NEED TO EXCLUDE BOLLARDS INSIDE BOX
                 }
                 break;
@@ -159,87 +159,3 @@ int main() {
 }
 
 
-// int main(void) {
-//     // Both of these only for testing purposes. Not required
-//     // volatile uint16_t ultrasonic_read;
-//     // volatile uint16_t adc_read;
-
-    // Kobuki_Typedef kobuki;
-    // US_Typedef object;
-    // Kobuki_LED_Enum led_1, led_2;
-
-    // UART_Init();
-    // ADC_Init();
-    // Ultrasonic_Init();
-
-
-
-//     state = IDLE;
-//     led_1 = OFF;
-//     led_2 = OFF;
-
-//     // adding this comment on my branch
-
-//     while (1) {
-//         Kobuki_Read(&kobuki);
-//         Ultrasonic_Detect(&object);
-
-//         // Both of these only for testing purposes. Not required
-//         // ultrasonic_read = Ultrasonic_Read();
-//         // adc_read = ADC_Read(ADC_CHANNEL_1);
-
-//         Kobuki_Update_LEDs(led_1, led_2);
-
-//         // A TEST FSM
-//         switch (state) {
-//             case IDLE:
-//                 if (kobuki.button == BUTTON_0_START) {
-//                     state = SEARCH;
-//                     led_1 = RED;
-//                     Kobuki_Rotate_Angle_Setpoint(kobuki.angle, 450);
-//                     // Kobuki_Drive_Distance_Setpoint(kobuki.distance, 100);
-//                 }
-//                 else if (kobuki.button == BUTTON_1_STOP) {
-//                     state = SEARCH;
-//                     led_1 = RED;
-//                     Kobuki_Rotate_Angle_Setpoint(kobuki.angle, 270);
-//                     // Kobuki_Drive_Distance_Setpoint(kobuki.distance, -100);
-//                 }
-//                 else if (kobuki.button == BUTTON_2_ROTATE) {
-//                     state = SEARCH;
-//                     led_1 = RED;
-//                     Kobuki_Rotate_Angle_Setpoint(kobuki.angle, 90);
-//                     // Kobuki_Drive_Distance_Setpoint(kobuki.distance, 1000);
-//                 }
-//                 else {
-//                     // Kobuki_Drive(STOP);
-//                     Kobuki_Drive(0); // STOP isnt provided anywhere so i assume this is 0
-//                 }
-//                 break;
-
-//             case SEARCH:
-//                 if ((kobuki.wheeldrop != FALSE) |
-//                     ((kobuki.bumper + kobuki.cliff) != FALSE) |
-//                     (kobuki.rotation_complete == TRUE) |
-//                     (kobuki.distance_complete == TRUE)
-//                 ) {
-//                     state = IDLE;
-//                     led_1 = YELLOW;
-//                 }
-//                 else {
-//                     Kobuki_Rotate_Angle(kobuki.angle);
-//                     // Kobuki_Drive_Distance(kobuki.distance);
-//                 }
-//                 break;
-
-//             case OBSTACLE:
-//                 break;
-
-//             case AVOID:
-//                 break;
-
-//             case OBJECT:
-//                 break;
-//         }
-//     }
-// }
