@@ -9,6 +9,10 @@ uint16_t path_first_drive_distance = 0;
 uint16_t path_second_drive_distance = 0;
 uint16_t path_third_drive_distance = 0;
 
+/* Heading at the start of leg 1. Every path turn is aimed relative to this,
+   so a bump/cliff nudge (or turn error) on one leg does not carry into the next. */
+static int16_t path_ref_angle = 0;
+
 
 void pathfind_reset(void)
 {
@@ -19,6 +23,7 @@ uint8_t pathfind_fsm(Kobuki_Typedef *kobuki)
 {
     switch (path_state) {
         case PATH_IDLE:
+            path_ref_angle = kobuki->angle;
             Kobuki_Drive_Distance_Setpoint(kobuki->distance, path_first_drive_distance);
             path_state = FIRST_DRIVE;
             break;
@@ -26,7 +31,7 @@ uint8_t pathfind_fsm(Kobuki_Typedef *kobuki)
             if (!distance_complete) {
                 Kobuki_Drive_Distance(kobuki->distance);
             } else {
-                Kobuki_Rotate_Angle_Setpoint(kobuki->angle, path_first_angle);
+                Kobuki_Rotate_Angle_Setpoint(path_ref_angle, path_first_angle);
                 path_state = FIRST_ROTATE;
             }
             break;
@@ -42,7 +47,7 @@ uint8_t pathfind_fsm(Kobuki_Typedef *kobuki)
             if (!distance_complete) {
                 Kobuki_Drive_Distance(kobuki->distance);
             } else {
-                Kobuki_Rotate_Angle_Setpoint(kobuki->angle, path_second_angle);
+                Kobuki_Rotate_Angle_Setpoint(path_ref_angle, (int16_t)(path_first_angle + path_second_angle));
                 path_state = SECOND_ROTATE;
             }
             break;
