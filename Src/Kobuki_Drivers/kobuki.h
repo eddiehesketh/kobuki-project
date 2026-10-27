@@ -51,3 +51,5 @@ void Kobuki_Rotate_Angle(int16_t current_angle_tick);
 void Kobuki_Drive_Distance_Setpoint(uint16_t current_distance_tick, int16_t distance);
 // Kobuki drive to a specific distance
 void Kobuki_Drive_Distance(uint16_t current_distance_tick);
+// Distance (mm) still to go on the current drive setpoint
+int16_t Kobuki_Drive_Distance_Remaining(uint16_t current_distance_tick);

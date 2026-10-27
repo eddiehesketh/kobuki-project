@@ -28,6 +28,7 @@
 #include "navigation.h"
 #include "orient.h"
 #include "decision.h"
+#include "reflex.h"
 
 /* Kobuki button values */
 #define BUTTON_0_START  0x01U
@@ -111,15 +112,47 @@ int main() {
             ((kobuki.button & BUTTON_1_STOP) != 0U)) {
             Kobuki_Drive(0);
             pathfind_reset();
+            Reflex_Reset();
             orient_step = ORIENT_IDLE;
             current_state = IDLE;
             continue;
+        }
+
+        /* Bumper / cliff recovery. Only reacts while driving forward: in-place
+           turns (scans, ALIGN, path rotations) don't move toward an edge. */
+        uint8_t driving_forward =
+            ((current_state == PATHFIND) &&
+             ((path_state == FIRST_DRIVE) ||
+              (path_state == SECOND_DRIVE) ||
+              (path_state == THIRD_DRIVE))) ||
+            (current_state == DEPOSIT);
+
+        /* In DEPOSIT, touching the final bollard means we have arrived. */
+        if ((current_state == DEPOSIT) && (kobuki.bumper != 0U) &&
+            (kobuki.cliff == 0U) && (Reflex_Busy() == 0U)) {
+            Kobuki_Drive(0);
+            current_state = IDLE;
+            continue;
+        }
+
+        uint8_t reflex_result = Reflex_Update(&kobuki, driving_forward);
+        if (reflex_result == REFLEX_GAVE_UP) {
+            Kobuki_Drive(0);
+            pathfind_reset();
+            Reflex_Reset();
+            orient_step = ORIENT_IDLE;
+            current_state = IDLE;
+            continue;
+        }
+        if (reflex_result == REFLEX_ACTIVE) {
+            continue;   /* recovery owns the motors this loop */
         }
 
         switch (current_state) {
             case IDLE:
                 Kobuki_Drive(0);
                 pathfind_reset();
+                Reflex_Reset();
                 orient_step = ORIENT_IDLE;
 
                 if (kobuki.button == BUTTON_0_START) {

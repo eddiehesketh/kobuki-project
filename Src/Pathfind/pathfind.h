@@ -19,5 +19,7 @@ extern uint16_t path_third_drive_distance;
     THIRD_DRIVE
 } pathfind_state;
 
+extern pathfind_state path_state;
+
 void pathfind_reset(void);
 uint8_t pathfind_fsm(Kobuki_Typedef *kobuki);

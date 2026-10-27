@@ -269,6 +269,22 @@ void Kobuki_Drive_Distance(uint16_t current_distance_tick)
     }
 }
 
+int16_t Kobuki_Drive_Distance_Remaining(uint16_t current_distance_tick)
+{
+    int32_t error_ticks = (int32_t)(uint16_t)setpoint_distance_tick
+                        - (int32_t)current_distance_tick;
+
+    /* Account for the encoder wrapping between 65535 and 0. */
+    if (error_ticks > 32767) {
+        error_ticks -= 65536;
+    }
+    else if (error_ticks < -32768) {
+        error_ticks += 65536;
+    }
+
+    return (int16_t)(error_ticks * MM_PER_TICK);
+}
+
 #define EXTERN_PWR 0x30
 
 void Kobuki_Update_LEDs(Kobuki_LED_Enum led_1_colour,

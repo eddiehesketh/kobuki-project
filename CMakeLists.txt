@@ -51,6 +51,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   Src/ADC
   Src/Ultrasonic
   Src/Decision
+  Src/Reflex
 )
 
 # Compiler options
