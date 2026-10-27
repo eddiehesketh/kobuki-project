@@ -32,6 +32,14 @@
 
 static volatile int32_t setpoint_distance_tick;
 static volatile int16_t setpoint_angle_deg;
+static volatile int16_t hold_angle_tick;
+
+/* Heading hold while driving: commanded turn rate (rad/s) per degree of
+   heading error. Higher = corrects wheel pull harder, too high = weaves.
+   Set to 0.0 to turn heading hold off (drives straight like before). */
+#define HOLD_GAIN_RAD_S_PER_DEG  (0.05)
+#define HOLD_MAX_RATE_RAD_S      (0.30)
+#define WHEELBASE_MM             (230.0)
 
 /* Updated by the movement controllers we will add next. */
 uint8_t rotation_complete = 0;
@@ -266,6 +274,99 @@ void Kobuki_Drive_Distance(uint16_t current_distance_tick)
               + (int16_t)(GAIN_DRIVE * error_mm);
 
         Kobuki_Drive(speed);
+    }
+}
+
+void Kobuki_Drive_Arc(int16_t speed, int16_t radius)
+{
+    int32_t cmd_speed = speed;
+
+    /* Protocol spec: for an arc the speed field is scaled by
+       (R + b/2)/R for R > 1, or (R - b/2)/R for R < -1. */
+    if (radius > 1) {
+        cmd_speed = (int32_t)((double)speed * ((double)radius + WHEELBASE_MM / 2.0) / (double)radius);
+    }
+    else if (radius < -1) {
+        cmd_speed = (int32_t)((double)speed * ((double)radius - WHEELBASE_MM / 2.0) / (double)radius);
+    }
+
+    if (cmd_speed > SPEED_LIMIT) {
+        cmd_speed = SPEED_LIMIT;
+    }
+    else if (cmd_speed < -SPEED_LIMIT) {
+        cmd_speed = -SPEED_LIMIT;
+    }
+
+    uint8_t payload[] = {0x01, 0x04, 0x00, 0x00, 0x00, 0x00};
+    payload[2] = (uint8_t)cmd_speed;
+    payload[3] = (uint8_t)(cmd_speed >> 8);
+    payload[4] = (uint8_t)radius;
+    payload[5] = (uint8_t)(radius >> 8);
+    Kobuki_Tx(payload, sizeof(payload));
+}
+
+void Kobuki_Heading_Hold_Set(int16_t angle_tick)
+{
+    hold_angle_tick = angle_tick;
+}
+
+void Kobuki_Drive_Distance_Hold(uint16_t current_distance_tick, int16_t current_angle_tick)
+{
+    int32_t error_ticks = (int32_t)(uint16_t)setpoint_distance_tick
+                        - (int32_t)current_distance_tick;
+
+    if (error_ticks > 32767) {
+        error_ticks -= 65536;
+    }
+    else if (error_ticks < -32768) {
+        error_ticks += 65536;
+    }
+
+    int16_t error_mm = (int16_t)(error_ticks * MM_PER_TICK);
+
+    if (abs(error_mm) <= 2) {
+        distance_complete = 1;
+        Kobuki_Drive(0);
+        return;
+    }
+
+    int16_t speed = (sign(error_mm) * MIN_SPEED) + (int16_t)(GAIN_DRIVE * error_mm);
+    if (speed > SPEED_LIMIT) {
+        speed = SPEED_LIMIT;
+    }
+    else if (speed < -SPEED_LIMIT) {
+        speed = -SPEED_LIMIT;
+    }
+
+    /* Heading error in degrees, shortest way round. +ve = need to turn left. */
+    int32_t heading_err = (int32_t)hold_angle_tick - current_angle_tick;
+    if (heading_err > 18000) {
+        heading_err -= 36000;
+    }
+    else if (heading_err < -18000) {
+        heading_err += 36000;
+    }
+
+    double turn_rate = HOLD_GAIN_RAD_S_PER_DEG * ((double)heading_err / 100.0);
+    if (turn_rate > HOLD_MAX_RATE_RAD_S) {
+        turn_rate = HOLD_MAX_RATE_RAD_S;
+    }
+    else if (turn_rate < -HOLD_MAX_RATE_RAD_S) {
+        turn_rate = -HOLD_MAX_RATE_RAD_S;
+    }
+
+    /* radius = speed / turn rate. Works for reversing too (sign flips). */
+    double radius = (turn_rate != 0.0) ? ((double)speed / turn_rate) : 0.0;
+
+    if ((radius > 30000.0) || (radius < -30000.0) || (turn_rate == 0.0)) {
+        Kobuki_Drive_Arc(speed, 0);          /* error tiny: straight */
+    }
+    else {
+        int16_t r = (int16_t)radius;
+        if ((r >= -1) && (r <= 1)) {
+            r = (r < 0) ? -2 : 2;            /* 1 / -1 mean spin on the spot */
+        }
+        Kobuki_Drive_Arc(speed, r);
     }
 }
 

@@ -197,6 +197,7 @@ int main() {
                     if (approach < 0) {
                         approach = 0;
                     }
+                    Kobuki_Heading_Hold_Set(kobuki.angle);
                     Kobuki_Drive_Distance_Setpoint(kobuki.distance, approach);
                     current_state = DEPOSIT;
                 }
@@ -207,7 +208,7 @@ int main() {
             }
             case DEPOSIT:
                 if (!distance_complete) {
-                    Kobuki_Drive_Distance(kobuki.distance);
+                    Kobuki_Drive_Distance_Hold(kobuki.distance, kobuki.angle);
                 } else {
                     Kobuki_Drive(0);
                     current_state = IDLE;

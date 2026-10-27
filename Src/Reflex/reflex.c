@@ -108,7 +108,9 @@ uint8_t Reflex_Update(const Kobuki_Typedef *kobuki, uint8_t driving_forward)
                 Kobuki_Rotate_Angle(kobuki->angle);
             }
             else {
-                /* Hand the drive leg back to the main FSM. */
+                /* Hand the drive leg back to the main FSM, holding the nudged
+                   heading for the rest of this leg (next path turn snaps back). */
+                Kobuki_Heading_Hold_Set(kobuki->angle);
                 Kobuki_Drive_Distance_Setpoint(kobuki->distance, resume_mm);
                 step = REFLEX_IDLE;
             }

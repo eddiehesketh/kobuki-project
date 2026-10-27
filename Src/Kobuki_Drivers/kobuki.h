@@ -52,4 +52,10 @@ void Kobuki_Drive_Distance_Setpoint(uint16_t current_distance_tick, int16_t dist
 // Kobuki drive to a specific distance
 void Kobuki_Drive_Distance(uint16_t current_distance_tick);
 // Distance (mm) still to go on the current drive setpoint
-int16_t Kobuki_Drive_Distance_Remaining(uint16_t current_distance_tick);
+int16_t Kobuki_Drive_Distance_Remaining(uint16_t current_distance_tick);
+// Drive along an arc: speed at robot centre (mm/s), radius in mm (+ve = curve left, 0 = straight)
+void Kobuki_Drive_Arc(int16_t speed, int16_t radius);
+// Set the heading (gyro ticks, 1/100 deg) that Kobuki_Drive_Distance_Hold steers toward
+void Kobuki_Heading_Hold_Set(int16_t angle_tick);
+// Same as Kobuki_Drive_Distance, but steers with the gyro to hold the set heading
+void Kobuki_Drive_Distance_Hold(uint16_t current_distance_tick, int16_t current_angle_tick);
