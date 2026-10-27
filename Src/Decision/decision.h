@@ -13,7 +13,7 @@
    away (e.g. the bollards inside the enclosure) is ever scanned. */
 #define LAYOUT_B_MIN_MM 520
 #define LAYOUT_SPLIT_MM 610
-#define LAYOUT_A_MAX_MM 820
+#define LAYOUT_A_MAX_MM 840
 
 typedef enum {
     PATH_A,
