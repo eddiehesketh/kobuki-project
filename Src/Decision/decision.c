@@ -1,9 +1,9 @@
 #include "decision.h"
 
-#define B_ORIENT_ANGLE 83
-#define A_ORIENT_ANGLE -83
+#define B_ORIENT_ANGLE 85
+#define A_ORIENT_ANGLE -95
 #define A_ROTATION_1 90
-#define B_ROTATION_1 -95 // subject to change
+#define B_ROTATION_1 -90 // subject to change
 #define A_ROTATION_2 135  
 #define B_ROTATION_2 -135 
 #define A_DISTANCE_1 1200
