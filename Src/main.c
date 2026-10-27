@@ -118,14 +118,14 @@ int main() {
             continue;
         }
 
-        /* Bumper / cliff recovery. Only reacts while driving forward: in-place
-           turns (scans, ALIGN, path rotations) don't move toward an edge. */
+        /* Bumper / cliff recovery runs ONLY on the PATHFIND drive legs.
+           Never in ORIENT, DECISION, ALIGN, STORAGE or DEPOSIT, and not
+           during the in-place rotations between legs. */
         uint8_t driving_forward =
-            ((current_state == PATHFIND) &&
-             ((path_state == FIRST_DRIVE) ||
-              (path_state == SECOND_DRIVE) ||
-              (path_state == THIRD_DRIVE))) ||
-            (current_state == DEPOSIT);
+            (current_state == PATHFIND) &&
+            ((path_state == FIRST_DRIVE) ||
+             (path_state == SECOND_DRIVE) ||
+             (path_state == THIRD_DRIVE));
 
         /* In DEPOSIT, touching the final bollard means we have arrived. */
         if ((current_state == DEPOSIT) && (kobuki.bumper != 0U) &&
