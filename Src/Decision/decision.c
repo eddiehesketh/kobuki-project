@@ -29,13 +29,13 @@ Layout grid_layout;
 #define LAYOUT_SPLIT ((EXPECTED_A + EXPECTED_B) / 2)   /* 520 mm */
 
 static uint8_t LayoutA(uint16_t distance) {
-    /* 520 to 695 mm */
-    return (distance >= LAYOUT_SPLIT) && (distance <= EXPECTED_A + NOISE);
+    /* 610 to 820 mm (limits in decision.h) */
+    return (distance >= LAYOUT_SPLIT_MM) && (distance <= LAYOUT_A_MAX_MM);
 }
 
 static uint8_t LayoutB(uint16_t distance) {
-    /* 345 to 519 mm */
-    return (distance < LAYOUT_SPLIT) && (distance >= EXPECTED_B - NOISE);
+    /* 520 to 609 mm */
+    return (distance >= LAYOUT_B_MIN_MM) && (distance < LAYOUT_SPLIT_MM);
 }
 
 

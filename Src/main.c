@@ -36,7 +36,8 @@
 #define BUTTON_2_ROTATE 0x04U
 
 /* Ignore scan detections farther than the near bollards. */
-#define ORIENT_MAX_RANGE_MM 750
+/* Scan only out to the far edge of layout A's window (see decision.h). */
+#define ORIENT_MAX_RANGE_MM LAYOUT_A_MAX_MM
 /* Front edge of robot to final bollard when THIRD_DRIVE ends. MEASURE THIS. */
 #define FINAL_BOLLARD_GAP_MM 300
 #define STORAGE_MAX_RANGE_MM (FINAL_BOLLARD_GAP_MM + SENSOR_DISTANCE + 100)   /* 620 mm */
