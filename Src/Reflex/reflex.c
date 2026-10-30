@@ -2,9 +2,9 @@
 
 /* ---- Tuning ---------------------------------------------------------- */
 #define BUMP_BACKUP_MM   ((int16_t)80)   /* reverse this far after a bump        */
-#define BUMP_NUDGE_DEG   ((int16_t)5)    /* then turn this far away from the hit */
+#define BUMP_NUDGE_DEG   ((int16_t)7)   /* then turn this far away from the hit */
 #define CLIFF_BACKUP_MM  ((int16_t)150)  /* drop-off: back away further          */
-#define CLIFF_NUDGE_DEG  ((int16_t)10)
+#define CLIFF_NUDGE_DEG  ((int16_t)5)
 #define REFLEX_MAX_HITS  ((uint8_t)6)    /* per run; more than this = stuck      */
 /* ---------------------------------------------------------------------- */
 
