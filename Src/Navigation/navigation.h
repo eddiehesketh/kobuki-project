@@ -21,20 +21,14 @@ typedef struct {
     int16_t previous_angle;
     int32_t swept_angle;
 
-    /* Debounce: an edge only counts after SCAN_DEBOUNCE_SAMPLES readings in a row
-       agree, and the angle saved is the one from the FIRST of those readings. */
+    // An edge counts after SCAN_DEBOUNCE_SAMPLES readings. The saved angle is the first.
     uint8_t run_count;
     int16_t run_start_angle;
 } NavigationScan;
 
 
-// Calculate the midpoint between two angles.
 int16_t Navigation_Midpoint(int16_t first_angle, int16_t second_angle);
-// Start a new navigation scan.
 void Navigation_Scan_Start(NavigationScan *scan, int16_t current_angle, uint8_t detected);
-/// Update the current navigation scan.
 void Navigation_Scan_Update(NavigationScan *scan, int16_t current_angle, uint8_t detected);
-// Return back to the midpt of the bollard
-void Navigation_Orient_Start(int16_t target_angle);
-// Update the current orientation.
-uint8_t Navigation_Orient_Update(const Kobuki_Typedef *kobuki);
+void Navigation_Orient_Start(int16_t target_angle); // turn to the bollard midpoint
+uint8_t Navigation_Orient_Update(const Kobuki_Typedef *kobuki); // 1 when the turn finishes

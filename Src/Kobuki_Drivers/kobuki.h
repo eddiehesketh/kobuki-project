@@ -6,20 +6,15 @@
 extern uint8_t rotation_complete;
 extern uint8_t distance_complete;
 
-//Kobuki structure
 typedef struct {
     uint8_t cliff;
     uint8_t bumper;
     uint8_t wheeldrop;
     uint8_t button;
-
-    // add the movement feedback fields from the project resource //
-
-    uint16_t distance;         // Raw wheel encoder count
-    int16_t angle;             // Gyro angle in hundredths of a degree
-
-    uint8_t rotation_complete; // 1 when the requested turn finishes
-    uint8_t distance_complete; // 1 when the requested drive finishes
+    uint16_t distance; // raw wheel encoder count
+    int16_t angle; // gyro, hundredths of a degree
+    uint8_t rotation_complete; // 1 when the turn finishes
+    uint8_t distance_complete; // 1 when the drive finishes
 } Kobuki_Typedef;
 
 typedef enum {
@@ -33,29 +28,16 @@ void Kobuki_Update_LEDs(Kobuki_LED_Enum led_1_colour, Kobuki_LED_Enum led_2_colo
 
 #define SPEED_LIMIT (int16_t)(150)
 
-// Receive payload
 uint8_t Kobuki_Rx(uint8_t *feedback, uint32_t size_feedback);
-// Transmit payload
 void Kobuki_Tx(uint8_t *payload, uint8_t size_payload);
-// Kobuki receive payload and store
 void Kobuki_Read(Kobuki_Typedef *kobuki);
-// Kobuki drive forward/backward (+ve is forward)
-void Kobuki_Drive(int16_t speed);
-// Kobuki rotate CW/CCW (+ve is CCW)
-void Kobuki_Rotate(int16_t speed);
-// Kobuki rotate to a specific angle
+void Kobuki_Drive(int16_t speed); // +ve is forward
+void Kobuki_Rotate(int16_t speed); // +ve is CCW
 void Kobuki_Rotate_Angle_Setpoint(int16_t current_angle_tick, int16_t rot_angle_deg);
-// Kobuki rotate to a specific angle
 void Kobuki_Rotate_Angle(int16_t current_angle_tick);
-// Kobuki drive to a specific distance
 void Kobuki_Drive_Distance_Setpoint(uint16_t current_distance_tick, int16_t distance);
-// Kobuki drive to a specific distance
 void Kobuki_Drive_Distance(uint16_t current_distance_tick);
-// Distance (mm) still to go on the current drive setpoint
-int16_t Kobuki_Drive_Distance_Remaining(uint16_t current_distance_tick);
-// Drive along an arc: speed at robot centre (mm/s), radius in mm (+ve = curve left, 0 = straight)
-void Kobuki_Drive_Arc(int16_t speed, int16_t radius);
-// Set the heading (gyro ticks, 1/100 deg) that Kobuki_Drive_Distance_Hold steers toward
-void Kobuki_Heading_Hold_Set(int16_t angle_tick);
-// Same as Kobuki_Drive_Distance, but steers with the gyro to hold the set heading
-void Kobuki_Drive_Distance_Hold(uint16_t current_distance_tick, int16_t current_angle_tick);
+int16_t Kobuki_Drive_Distance_Remaining(uint16_t current_distance_tick); // mm left
+void Kobuki_Drive_Arc(int16_t speed, int16_t radius); // +ve radius curves left, 0 is straight
+void Kobuki_Heading_Hold_Set(int16_t angle_tick); // gyro ticks, 1/100 deg
+void Kobuki_Drive_Distance_Hold(uint16_t current_distance_tick, int16_t current_angle_tick);

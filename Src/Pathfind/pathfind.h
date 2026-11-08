@@ -10,7 +10,7 @@ extern uint16_t path_second_drive_distance;
 extern uint16_t path_third_drive_distance;
 
 
- typedef enum {
+typedef enum {
     PATH_IDLE,
     FIRST_DRIVE,
     FIRST_ROTATE,

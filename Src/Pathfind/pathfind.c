@@ -9,11 +9,10 @@ uint16_t path_first_drive_distance = 0;
 uint16_t path_second_drive_distance = 0;
 uint16_t path_third_drive_distance = 0;
 
-/* Heading at the start of leg 1. Every path turn is aimed relative to this,
-   so a bump/cliff nudge (or turn error) on one leg does not carry into the next. */
+// Heading at the start of leg 1. Later turns are relative to this.
 static int16_t path_ref_angle = 0;
 
-/* ref heading + deg, as a gyro reading (1/100 deg, -18000..17999) */
+// ref heading + deg, as gyro ticks (1/100 deg, -18000..17999).
 static int16_t heading_plus(int16_t ref_tick, int16_t deg)
 {
     int32_t h = (int32_t)ref_tick + (int32_t)deg * 100;

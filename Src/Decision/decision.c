@@ -4,8 +4,8 @@
 #define A_ORIENT_ANGLE -95
 #define A_ROTATION_1 90
 #define B_ROTATION_1 -90 // subject to change
-#define A_ROTATION_2 135  
-#define B_ROTATION_2 -135 
+#define A_ROTATION_2 135
+#define B_ROTATION_2 -135
 #define A_DISTANCE_1 1200
 #define A_DISTANCE_2 1400
 #define B_DISTANCE_1 1400
@@ -16,28 +16,22 @@
 
 Layout grid_layout;
 
-
 #define BOLLARD_A1_DISTANCE (375 + A_BUFFER)
 #define BOLLARD_B1_DISTANCE (225 + BUFFER)
 #define NOISE 100
 
-/* Expected sensor readings: A = 595 mm, B = 445 mm */
 #define EXPECTED_A (BOLLARD_A1_DISTANCE + SENSOR_DISTANCE)
-// #define EXPECTED_B (BOLLARD_B1_DISTANCE + SENSOR_DISTANCE)
-#define EXPECTED_B (620)
+#define EXPECTED_B 620 // tuned reading for layout B
 
-#define LAYOUT_SPLIT ((EXPECTED_A + EXPECTED_B) / 2)   /* 520 mm */
+#define LAYOUT_SPLIT ((EXPECTED_A + EXPECTED_B) / 2)
 
 static uint8_t LayoutA(uint16_t distance) {
-    /* 610 to 820 mm (limits in decision.h) */
     return (distance >= LAYOUT_SPLIT_MM) && (distance <= LAYOUT_A_MAX_MM);
 }
 
 static uint8_t LayoutB(uint16_t distance) {
-    /* 520 to 609 mm */
     return (distance >= LAYOUT_B_MIN_MM) && (distance < LAYOUT_SPLIT_MM);
 }
-
 
 uint8_t Determine_Layout(uint16_t distance) {
     if (LayoutA(distance)) {

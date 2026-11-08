@@ -2,9 +2,9 @@
 
 #include <stdint.h>
 
-/* Only a ceiling: each caller (orient_fsm) applies its own tighter max range. */
+// Ceiling only. Each caller applies its own tighter max range.
 #define ULTRASONIC_DETECT_RANGE_MM ((uint16_t)1000U)
-#define ULTRASONIC_MAX_RANGE_MM    ((uint16_t)5000U)
+#define ULTRASONIC_MAX_RANGE_MM ((uint16_t)5000U)
 
 typedef struct {
     uint8_t detected;

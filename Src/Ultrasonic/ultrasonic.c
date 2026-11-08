@@ -5,8 +5,8 @@
 #include "adc.h"
 #include "ultrasonic.h"
 
-#define ULTRASONIC_CHANNEL   ADC_CHANNEL_1
-#define ADC_MAX_VALUE        4095UL
+#define ULTRASONIC_CHANNEL ADC_CHANNEL_1
+#define ADC_MAX_VALUE 4095UL
 #define MB1043_FULL_SCALE_MM 5120UL
 
 void Ultrasonic_Init(void)

@@ -30,30 +30,19 @@
 #include "decision.h"
 #include "reflex.h"
 
-/* Kobuki button values */
-#define BUTTON_0_START  0x01U
-#define BUTTON_1_STOP   0x02U
+// Kobuki button bits.
+#define BUTTON_0_START 0x01U
+#define BUTTON_1_STOP 0x02U
 #define BUTTON_2_ROTATE 0x04U
 
-/* Ignore scan detections farther than the near bollards. */
-/* Scan only out to the far edge of layout A's window (see decision.h). */
+// Orient scan stops at the far edge of layout A.
 #define ORIENT_MAX_RANGE_MM LAYOUT_A_MAX_MM
-/* Front edge of robot to final bollard when THIRD_DRIVE ends. MEASURE THIS. */
+// Gap from the robot edge to the final bollard.
 #define FINAL_BOLLARD_GAP_MM 300
-// #define STORAGE_MAX_RANGE_MM (FINAL_BOLLARD_GAP_MM + SENSOR_DISTANCE + 100)   /* 620 mm */
-#define STORAGE_MAX_RANGE_MM 560 //20 mm */
-
-
+#define STORAGE_MAX_RANGE_MM 560 // mm
 #define FINISHING_DISTANCE 150
 
-
-
-// Logic
-#define FALSE 0
-#define TRUE 1
-
-// States
-typedef enum { 
+typedef enum {
     IDLE,
     ORIENT,
     DECISION,
@@ -61,38 +50,7 @@ typedef enum {
     PATHFIND,
     STORAGE,
     DEPOSIT
- } fsm_state; // far more to be added
-
-// int main() {
-
-
-//     Kobuki_Typedef kobuki = {0};
-//     US_Typedef ultrasonic = {0};
-//     // NavigationScan navigation_object;
-//     // Kobuki_LED_Enum led_1, led_2;
-
-//     UART_Init(); 
-//     ADC_Init();
-//     Ultrasonic_Init();
-
-//     while (1) {
-//         Kobuki_Read(&kobuki);
-//         Ultrasonic_Detect(&ultrasonic);
-
-//         /* Global stop conditions take priority over the FSM. */
-//         if ((kobuki.wheeldrop != 0U) ||
-//             ((kobuki.button & BUTTON_1_STOP) != 0U)) {
-//             Kobuki_Drive(0);
-//             pathfind_reset();
-//             // orient_step = ORIENT_IDLE;
-//             // current_state = IDLE;
-//             continue;
-//         }
-
-
-// }
-// }
-
+} fsm_state;
 
 int main() {
     fsm_state current_state = IDLE;
@@ -100,9 +58,8 @@ int main() {
     Kobuki_Typedef kobuki = {0};
     US_Typedef ultrasonic = {0};
     NavigationScan navigation_object;
-    // Kobuki_LED_Enum led_1, led_2;
 
-    UART_Init(); 
+    UART_Init();
     ADC_Init();
     Ultrasonic_Init();
 
@@ -110,7 +67,7 @@ int main() {
         Kobuki_Read(&kobuki);
         Ultrasonic_Detect(&ultrasonic);
 
-        /* Global stop conditions take priority over the FSM. */
+        // Wheel drop or the stop button overrides the FSM.
         if ((kobuki.wheeldrop != 0U) ||
             ((kobuki.button & BUTTON_1_STOP) != 0U)) {
             Kobuki_Drive(0);
@@ -121,16 +78,14 @@ int main() {
             continue;
         }
 
-        /* Bumper / cliff recovery runs ONLY on the PATHFIND drive legs.
-           Never in ORIENT, DECISION, ALIGN, STORAGE or DEPOSIT, and not
-           during the in-place rotations between legs. */
+        // Bumper and cliff recovery only on PATHFIND drive legs.
         uint8_t driving_forward =
             (current_state == PATHFIND) &&
             ((path_state == FIRST_DRIVE) ||
              (path_state == SECOND_DRIVE) ||
              (path_state == THIRD_DRIVE));
 
-        /* In DEPOSIT, touching the final bollard means we have arrived. */
+        // In DEPOSIT a bumper means the final bollard was reached.
         if ((current_state == DEPOSIT) && (kobuki.bumper != 0U) &&
             (kobuki.cliff == 0U) && (Reflex_Busy() == 0U)) {
             Kobuki_Drive(0);
@@ -148,7 +103,7 @@ int main() {
             continue;
         }
         if (reflex_result == REFLEX_ACTIVE) {
-            continue;   /* recovery owns the motors this loop */
+            continue; // recovery owns the motors this loop
         }
 
         switch (current_state) {
@@ -176,8 +131,8 @@ int main() {
             }
             case DECISION:
                 if (Determine_Layout(ultrasonic.range_mm)) {
-                    Kobuki_Rotate_Angle_Setpoint(kobuki.angle, path_orient_angle); // hard coding this for now, will need to be changed to a variable based on the layout
-                    current_state = ALIGN; // NEED TO EXCLUDE BOLLARDS INSIDE BOX
+                    Kobuki_Rotate_Angle_Setpoint(kobuki.angle, path_orient_angle);
+                    current_state = ALIGN;
                 }
                 break;
             case ALIGN:
@@ -186,7 +141,7 @@ int main() {
                 } else {
                     current_state = PATHFIND;
                 }
-                break; // need to add
+                break;
             case PATHFIND:
                 if (pathfind_fsm(&kobuki)) {
                     current_state = STORAGE;
