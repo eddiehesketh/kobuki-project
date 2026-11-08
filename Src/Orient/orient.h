@@ -3,6 +3,7 @@
 #include "navigation.h"
 #include "ultrasonic.h"
 
+// FSM 2: Scan-and-face (report 4.2). Used by ORIENT and STORAGE in FSM 1.
 typedef enum {
     ORIENT_IDLE,
     ORIENT_SCANNING,

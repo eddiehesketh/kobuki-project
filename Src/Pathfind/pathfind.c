@@ -31,16 +31,17 @@ void pathfind_reset(void)
     path_state = PATH_IDLE;
 }
 
+// FSM 4: Path. Drive states can be interrupted by FSM 5, then carry on.
 uint8_t pathfind_fsm(Kobuki_Typedef *kobuki)
 {
     switch (path_state) {
-        case PATH_IDLE:
+        case PATH_IDLE: // save the start heading, load leg 1
             path_ref_angle = kobuki->angle;
             Kobuki_Heading_Hold_Set(path_ref_angle);
             Kobuki_Drive_Distance_Setpoint(kobuki->distance, path_first_drive_distance);
             path_state = FIRST_DRIVE;
             break;
-        case FIRST_DRIVE:
+        case FIRST_DRIVE: // leg 1
             if (!distance_complete) {
                 Kobuki_Drive_Distance_Hold(kobuki->distance, kobuki->angle);
             } else {
@@ -48,7 +49,7 @@ uint8_t pathfind_fsm(Kobuki_Typedef *kobuki)
                 path_state = FIRST_ROTATE;
             }
             break;
-        case FIRST_ROTATE:
+        case FIRST_ROTATE: // turn 1
             if (!rotation_complete) {
                 Kobuki_Rotate_Angle(kobuki->angle);
             } else {
@@ -57,7 +58,7 @@ uint8_t pathfind_fsm(Kobuki_Typedef *kobuki)
                 path_state = SECOND_DRIVE;
             }
             break;
-        case SECOND_DRIVE:
+        case SECOND_DRIVE: // leg 2
             if (!distance_complete) {
                 Kobuki_Drive_Distance_Hold(kobuki->distance, kobuki->angle);
             } else {
@@ -65,7 +66,7 @@ uint8_t pathfind_fsm(Kobuki_Typedef *kobuki)
                 path_state = SECOND_ROTATE;
             }
             break;
-        case SECOND_ROTATE:
+        case SECOND_ROTATE: // turn 2
             if (!rotation_complete) {
                 Kobuki_Rotate_Angle(kobuki->angle);
             } else {
@@ -74,12 +75,12 @@ uint8_t pathfind_fsm(Kobuki_Typedef *kobuki)
                 path_state = THIRD_DRIVE;
             }
             break;
-        case THIRD_DRIVE:
+        case THIRD_DRIVE: // leg 3, into storage
             if (!distance_complete) {
                 Kobuki_Drive_Distance_Hold(kobuki->distance, kobuki->angle);
             } else {
                 path_state = PATH_IDLE;
-                return 1;
+                return 1; // FSM 1 moves to STORAGE
             }
             break;
         default:

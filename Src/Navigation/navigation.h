@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 
+// FSM 3: Edge scan (report 4.3). Run by ORIENT_SCANNING in FSM 2.
 typedef enum {
     CLEAR_OBJECT = 0,
     FIND_ANGLE_1,
@@ -14,9 +15,9 @@ typedef enum {
 typedef struct {
     NavigationScanState state;
 
-    int16_t angle1;
-    int16_t angle2;
-    int16_t midpoint;
+    int16_t angle1; // theta 1: object enters the beam
+    int16_t angle2; // theta 2: object leaves the beam
+    int16_t midpoint; // theta mid: heading to face
 
     int16_t previous_angle;
     int32_t swept_angle;

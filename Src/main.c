@@ -42,6 +42,7 @@
 #define STORAGE_MAX_RANGE_MM 560 // mm
 #define FINISHING_DISTANCE 150
 
+// FSM 1: Main state machine (report 4.1).
 typedef enum {
     IDLE,
     ORIENT,
@@ -63,10 +64,12 @@ int main() {
     ADC_Init();
     Ultrasonic_Init();
 
+    // Each loop: safety check, deposit arrival, FSM 5, then one step of FSM 1.
     while (1) {
         Kobuki_Read(&kobuki);
         Ultrasonic_Detect(&ultrasonic);
 
+        // 1. Safety check.
         // Wheel drop or the stop button overrides the FSM.
         if ((kobuki.wheeldrop != 0U) ||
             ((kobuki.button & BUTTON_1_STOP) != 0U)) {
@@ -85,6 +88,7 @@ int main() {
              (path_state == SECOND_DRIVE) ||
              (path_state == THIRD_DRIVE));
 
+        // 2. Deposit arrival.
         // In DEPOSIT a bumper means the final bollard was reached.
         if ((current_state == DEPOSIT) && (kobuki.bumper != 0U) &&
             (kobuki.cliff == 0U) && (Reflex_Busy() == 0U)) {
@@ -93,8 +97,9 @@ int main() {
             continue;
         }
 
+        // 3. FSM 5: bump and cliff recovery.
         uint8_t reflex_result = Reflex_Update(&kobuki, driving_forward);
-        if (reflex_result == REFLEX_GAVE_UP) {
+        if (reflex_result == REFLEX_GAVE_UP) { // seventh hit
             Kobuki_Drive(0);
             pathfind_reset();
             Reflex_Reset();
@@ -106,8 +111,9 @@ int main() {
             continue; // recovery owns the motors this loop
         }
 
+        // 4. One step of the current state.
         switch (current_state) {
-            case IDLE:
+            case IDLE: // motors off, wait for B0
                 Kobuki_Drive(0);
                 pathfind_reset();
                 Reflex_Reset();
@@ -118,39 +124,40 @@ int main() {
                 }
                 break;
 
-            case ORIENT: {
+            case ORIENT: { // FSM 2 at 840 mm: face the start bollard
                 uint8_t orient_result = orient_fsm(&kobuki, &ultrasonic, &navigation_object, ORIENT_MAX_RANGE_MM);
 
                 if (orient_result == 1U) {
                     current_state = DECISION;
                 }
-                else if (orient_result == 2U) {
+                else if (orient_result == 2U) { // nothing found
                     current_state = IDLE;
                 }
                 break;
             }
-            case DECISION:
+            case DECISION: // pick layout A or B; waits if outside both windows
                 if (Determine_Layout(ultrasonic.range_mm)) {
                     Kobuki_Rotate_Angle_Setpoint(kobuki.angle, path_orient_angle);
                     current_state = ALIGN;
                 }
                 break;
-            case ALIGN:
+            case ALIGN: // turn onto leg 1
                 if (!rotation_complete) {
                     Kobuki_Rotate_Angle(kobuki.angle);
                 } else {
                     current_state = PATHFIND;
                 }
                 break;
-            case PATHFIND:
+            case PATHFIND: // FSM 4: three legs, two turns
                 if (pathfind_fsm(&kobuki)) {
                     current_state = STORAGE;
                 }
                 break;
-            case STORAGE: {
+            case STORAGE: { // FSM 2 at 560 mm: face the deposit marker
                 uint8_t orient_result = orient_fsm(&kobuki, &ultrasonic, &navigation_object, STORAGE_MAX_RANGE_MM);
 
                 if (orient_result == 1U) {
+                    // d = r - 220 - 150 mm
                     int16_t approach = (int16_t)ultrasonic.range_mm - SENSOR_DISTANCE - FINISHING_DISTANCE;
                     if (approach < 0) {
                         approach = 0;
@@ -159,12 +166,12 @@ int main() {
                     Kobuki_Drive_Distance_Setpoint(kobuki.distance, approach);
                     current_state = DEPOSIT;
                 }
-                else if (orient_result == 2U) {
+                else if (orient_result == 2U) { // nothing found
                     current_state = IDLE;
                 }
                 break;
             }
-            case DEPOSIT:
+            case DEPOSIT: // drive the approach with heading hold
                 if (!distance_complete) {
                     Kobuki_Drive_Distance_Hold(kobuki.distance, kobuki.angle);
                 } else {

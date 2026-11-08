@@ -35,6 +35,7 @@ int16_t Navigation_Midpoint(int16_t first_angle, int16_t second_angle)
     return (int16_t)midpoint;
 }
 
+// Reset FSM 3 and pick its first state.
 void Navigation_Scan_Start(NavigationScan *scan, int16_t current_angle, uint8_t detected)
 {
     scan->angle1 = 0;
@@ -49,6 +50,7 @@ void Navigation_Scan_Start(NavigationScan *scan, int16_t current_angle, uint8_t 
     scan->state = (detected != 0U) ? CLEAR_OBJECT : FIND_ANGLE_1;
 }
 
+// FSM 3: Edge scan. Rotates counter-clockwise until both edges are found.
 void Navigation_Scan_Update(NavigationScan *scan, int16_t current_angle, uint8_t detected)
 {
     if ((scan->state == SCAN_COMPLETE) || (scan->state == SCAN_FAILED)) {
@@ -78,14 +80,14 @@ void Navigation_Scan_Update(NavigationScan *scan, int16_t current_angle, uint8_t
     }
 
     switch (scan->state) {
-        case CLEAR_OBJECT:
+        case CLEAR_OBJECT: // wait for the starting object to leave the beam
             if (detected == 0U) {
                 scan->state = FIND_ANGLE_1;
                 scan->swept_angle = 0; // this step gets its own angle limit
             }
             break;
 
-        case FIND_ANGLE_1:
+        case FIND_ANGLE_1: // wait for the object to enter: theta 1
             if (detected != 0U) {
                 if (scan->run_count == 0U) {
                     scan->run_start_angle = current_angle; // first sample of the run
@@ -103,7 +105,7 @@ void Navigation_Scan_Update(NavigationScan *scan, int16_t current_angle, uint8_t
             }
             break;
 
-        case FIND_ANGLE_2:
+        case FIND_ANGLE_2: // wait for the object to leave: theta 2, then the midpoint
             if (detected == 0U) {
                 if (scan->run_count == 0U) {
                     scan->run_start_angle = current_angle;
@@ -143,6 +145,7 @@ void Navigation_Scan_Update(NavigationScan *scan, int16_t current_angle, uint8_t
     Kobuki_Rotate(SCAN_SPEED_MM_S);
 }
 
+// Used by ORIENT_TURNING in FSM 2.
 void Navigation_Orient_Start(int16_t target_angle)
 {
     Kobuki_Rotate_Angle_Setpoint(target_angle, 0);

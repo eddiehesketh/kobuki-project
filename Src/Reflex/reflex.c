@@ -6,6 +6,7 @@
 #define CLIFF_NUDGE_DEG ((int16_t)5)
 #define REFLEX_MAX_HITS ((uint8_t)6) // per run; more than this means stuck
 
+// FSM 5: Bump and cliff recovery (report 4.5).
 typedef enum {
     REFLEX_IDLE,
     REFLEX_BACKUP,
@@ -49,10 +50,11 @@ uint8_t Reflex_Busy(void)
     return (step != REFLEX_IDLE) ? 1U : 0U;
 }
 
+// FSM 5: runs every loop before FSM 1, but only acts on PATHFIND drive legs.
 uint8_t Reflex_Update(const Kobuki_Typedef *kobuki, uint8_t driving_forward)
 {
     switch (step) {
-        case REFLEX_IDLE: {
+        case REFLEX_IDLE: { // check the bumper and cliff flags
             uint8_t cliff = kobuki->cliff & (SIDE_LEFT | SIDE_CENTRE | SIDE_RIGHT);
             uint8_t bumper = kobuki->bumper & (SIDE_LEFT | SIDE_CENTRE | SIDE_RIGHT);
             int16_t backup_mm;
@@ -84,6 +86,7 @@ uint8_t Reflex_Update(const Kobuki_Typedef *kobuki, uint8_t driving_forward)
             }
 
             // Drive the reversed distance again, on top of what was left.
+            // d_resume = d_remaining + d_reversed
             resume_mm = (int16_t)(remaining + backup_mm);
 
             Kobuki_Drive_Distance_Setpoint(kobuki->distance, (int16_t)-backup_mm);
@@ -91,7 +94,7 @@ uint8_t Reflex_Update(const Kobuki_Typedef *kobuki, uint8_t driving_forward)
             return REFLEX_ACTIVE;
         }
 
-        case REFLEX_BACKUP:
+        case REFLEX_BACKUP: // reverse 80 mm (bump) or 150 mm (cliff)
             if (!distance_complete) {
                 Kobuki_Drive_Distance(kobuki->distance);
             }
@@ -101,7 +104,7 @@ uint8_t Reflex_Update(const Kobuki_Typedef *kobuki, uint8_t driving_forward)
             }
             return REFLEX_ACTIVE;
 
-        case REFLEX_TURN:
+        case REFLEX_TURN: // turn 7 deg (bump) or 5 deg (cliff) away from the hit
             if (!rotation_complete) {
                 Kobuki_Rotate_Angle(kobuki->angle);
             }

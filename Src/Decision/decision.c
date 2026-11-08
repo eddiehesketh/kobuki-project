@@ -1,5 +1,6 @@
 #include "decision.h"
 
+// Path parameters per layout (report Table 4). Positive is counter-clockwise.
 #define B_ORIENT_ANGLE 83
 #define A_ORIENT_ANGLE -95
 #define A_ROTATION_1 90
@@ -33,6 +34,7 @@ static uint8_t LayoutB(uint16_t distance) {
     return (distance >= LAYOUT_B_MIN_MM) && (distance < LAYOUT_SPLIT_MM);
 }
 
+// Called from DECISION in FSM 1. Returns 1 once a layout's path parameters are loaded.
 uint8_t Determine_Layout(uint16_t distance) {
     if (LayoutA(distance)) {
         path_orient_angle = A_ORIENT_ANGLE;
