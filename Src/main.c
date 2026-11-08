@@ -169,7 +169,7 @@ int main()
                 }
                 break;
             case STATE_PATHFIND: // FSM 4: three legs, two turns
-                if (Pathfind_Update(&kobuki)) {
+                if (Pathfind_Update(&kobuki) == PATH_DONE) {
                     current_state = STATE_STORAGE;
                 }
                 break;
