@@ -1,9 +1,21 @@
+// ============================================================================
+// File:        reflex.c
+// Authors:     Thomas Hesketh, Charlie Arundell, Angus Heinjus
+// Date:        November 2026
+// Description: Bump and cliff recovery. On a hit during a forward drive leg:
+//              stop, back up, turn away from the hit side, then hand the leg
+//              back with the reversed distance added on.
+// FSM:         FSM 5 – bump and cliff recovery (report 4.5). Runs before FSM 1 each loop.
+// Provenance:  Original.
+// ============================================================================
+
 #include "reflex.h"
 
-#define BUMP_BACKUP_MM ((int16_t)80) // reverse this far after a bump
-#define BUMP_NUDGE_DEG ((int16_t)7) // then turn this far away from the hit
-#define CLIFF_BACKUP_MM ((int16_t)150) // drop-off: back away further
-#define CLIFF_NUDGE_DEG ((int16_t)5)
+// Tuning values, chosen on the course (report 3.6, 5.3).
+#define BUMP_BACKUP_MM ((int16_t)80) // reverse this far after a bump (mm)
+#define BUMP_NUDGE_DEG ((int16_t)7) // then turn this far away from the hit (degrees); raised from 5 to clear the obstacle
+#define CLIFF_BACKUP_MM ((int16_t)150) // drop-off: back away further (mm)
+#define CLIFF_NUDGE_DEG ((int16_t)5) // degrees; cut from 10, which threw the robot off course
 #define REFLEX_MAX_HITS ((uint8_t)6) // per run; more than this means stuck
 
 // FSM 5: Bump and cliff recovery (report 4.5).
@@ -19,7 +31,7 @@ static int16_t nudge_deg = 0; // +ve is CCW, -ve is CW
 static uint8_t hits = 0U;
 static uint8_t centre_turn_right = 1U; // alternates for head-on hits
 
-// Turn away from whichever side was hit.
+// Turn away from whichever side was hit: returns -deg (turn right) or +deg (turn left), degrees.
 static int16_t nudge_away(uint8_t flags, int16_t deg)
 {
     uint8_t left = (flags & SIDE_LEFT) != 0U;
@@ -37,6 +49,7 @@ static int16_t nudge_away(uint8_t flags, int16_t deg)
     return centre_turn_right ? (int16_t)-deg : deg;
 }
 
+// Original.
 void Reflex_Reset(void)
 {
     step = REFLEX_IDLE;
@@ -45,14 +58,26 @@ void Reflex_Reset(void)
     nudge_deg = 0;
 }
 
+// Original.
 uint8_t Reflex_Busy(void)
 {
     return (step != REFLEX_IDLE) ? 1U : 0U;
 }
 
+// Original.
 // FSM 5: runs every loop before FSM 1, but only acts on PATHFIND drive legs.
 uint8_t Reflex_Update(const Kobuki_Typedef *kobuki, uint8_t driving_forward)
 {
+    // FSM 5: bump and cliff recovery.
+    //   REFLEX_IDLE   - check bumper and cliff on forward drive legs. No hit:
+    //                   REFLEX_CLEAR. Hit: stop; REFLEX_GAVE_UP on the seventh
+    //                   hit, else set the backup. Next: REFLEX_BACKUP.
+    //   REFLEX_BACKUP - reverse 80 mm (bump) or 150 mm (cliff). Next:
+    //                   REFLEX_TURN when distance_complete.
+    //   REFLEX_TURN   - turn 7 deg (bump) or 5 deg (cliff) away from the hit.
+    //                   Next: REFLEX_IDLE when rotation_complete, with the leg
+    //                   restarted for d_resume.
+    // Every state except a clear REFLEX_IDLE returns REFLEX_ACTIVE.
     switch (step) {
         case REFLEX_IDLE: { // check the bumper and cliff flags
             uint8_t cliff = kobuki->cliff & (SIDE_LEFT | SIDE_CENTRE | SIDE_RIGHT);
@@ -79,8 +104,7 @@ uint8_t Reflex_Update(const Kobuki_Typedef *kobuki, uint8_t driving_forward)
             if (cliff != 0U) {
                 backup_mm = CLIFF_BACKUP_MM;
                 nudge_deg = nudge_away(cliff, CLIFF_NUDGE_DEG);
-            }
-            else {
+            } else {
                 backup_mm = BUMP_BACKUP_MM;
                 nudge_deg = nudge_away(bumper, BUMP_NUDGE_DEG);
             }
@@ -97,8 +121,7 @@ uint8_t Reflex_Update(const Kobuki_Typedef *kobuki, uint8_t driving_forward)
         case REFLEX_BACKUP: // reverse 80 mm (bump) or 150 mm (cliff)
             if (!distance_complete) {
                 Kobuki_Drive_Distance(kobuki->distance);
-            }
-            else {
+            } else {
                 Kobuki_Rotate_Angle_Setpoint(kobuki->angle, nudge_deg);
                 step = REFLEX_TURN;
             }
@@ -107,8 +130,7 @@ uint8_t Reflex_Update(const Kobuki_Typedef *kobuki, uint8_t driving_forward)
         case REFLEX_TURN: // turn 7 deg (bump) or 5 deg (cliff) away from the hit
             if (!rotation_complete) {
                 Kobuki_Rotate_Angle(kobuki->angle);
-            }
-            else {
+            } else {
                 // Hand the leg back, holding the nudged heading until the next turn.
                 Kobuki_Heading_Hold_Set(kobuki->angle);
                 Kobuki_Drive_Distance_Setpoint(kobuki->distance, resume_mm);

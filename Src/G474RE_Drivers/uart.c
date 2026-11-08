@@ -1,9 +1,20 @@
+// ============================================================================
+// File:        uart.c
+// Authors:     Thomas Hesketh, Charlie Arundell, Angus Heinjus
+// Date:        November 2026
+// Description: Polled USART3 driver (PC10 TX, PC11 RX, 115200 baud) used to
+//              talk to the Kobuki.
+// FSM:         None. Transport for kobuki.c.
+// Provenance:  Provided – practical drivers.
+// ============================================================================
+
 #define STM32G474xx
 #include "stm32g4xx.h"
 
+// Provided – practical drivers.
 void UART_Init(void)
 {
-    // 1. Enable peripheral clocks
+    // Enable peripheral clocks
     RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;
     RCC->APB1ENR1 |= RCC_APB1ENR1_USART3EN;
 
@@ -11,7 +22,7 @@ void UART_Init(void)
     RCC->CCIPR &= ~RCC_CCIPR_USART3SEL;
     RCC->CCIPR |= (2 << RCC_CCIPR_USART3SEL_Pos);
 
-    // 2. Configure PC10 (TX) and PC11 (RX)
+    // Configure PC10 (TX) and PC11 (RX)
     GPIOC->MODER &= ~(GPIO_MODER_MODE10 | GPIO_MODER_MODE11);
     GPIOC->MODER |= (GPIO_MODER_MODE10_1 | GPIO_MODER_MODE11_1);
 
@@ -19,12 +30,13 @@ void UART_Init(void)
     // Route Alternate Function 7 (AF7) to PC10 and PC11
     GPIOC->AFR[1] &= ~((0xF << GPIO_AFRH_AFSEL10_Pos) |
                        (0xF << GPIO_AFRH_AFSEL11_Pos));
-    GPIOC->AFR[1] |= ((7 << GPIO_AFRH_AFSEL10_Pos) |(7 << GPIO_AFRH_AFSEL11_Pos));
+    GPIOC->AFR[1] |= ((7 << GPIO_AFRH_AFSEL10_Pos) | (7 << GPIO_AFRH_AFSEL11_Pos));
 
-    // 3. Configure USART3
+    // Configure USART3
     USART3->CR1 &= ~USART_CR1_UE; // Turn off to allow config
 
     // Set Baud Rate to 115200 (Assuming 16 MHz HSI clock clocksource)
+    // 16 MHz / 115200 ≈ 139
     USART3->BRR = 139;
 
     // Enable Transmitter (TE) and Receiver (RE)
@@ -34,23 +46,29 @@ void UART_Init(void)
     USART3->CR1 |= USART_CR1_UE;
 }
 
+// Provided – practical drivers.
 void UART_Tx(uint8_t byte)
 {
     // Wait until Transmit Data Register is Empty (TXE) flag is set
-    while (!(USART3->ISR & USART_ISR_TXE));
+    while (!(USART3->ISR & USART_ISR_TXE)) {
+    }
 
     // Write the byte to the Transmit Data Register
     USART3->TDR = byte;
 }
 
+// Provided – practical drivers.
 uint8_t UART_Rx(void)
 {
-    // If an Overrun Error (ORE) occurs, clear it so we don’t getpermanently stuck
+    // If an Overrun Error (ORE) occurs, clear it so we don't get permanently stuck
     if (USART3->ISR & USART_ISR_ORE) {
         USART3->ICR = USART_ICR_ORECF; // Write 1 to clear the Overrun flag
     }
 
-    while (!(USART3->ISR & USART_ISR_RXNE));
+    // No timeout: the Kobuki streams feedback every 20 ms, so this wait is
+    // bounded in normal operation and paces the main loop at 50 Hz.
+    while (!(USART3->ISR & USART_ISR_RXNE)) {
+    }
 
     // Reading RDR automatically clears the RXNE flag
     return (uint8_t)(USART3->RDR & 0xFF);
