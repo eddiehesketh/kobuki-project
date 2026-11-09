@@ -1,3 +1,4 @@
+// Student numbers: a1925175 (Charlie Arundell), a1927512 (Angus Heinjus), a1942028 (Thomas Hesketh)
 // ============================================================================
 // File:        adc.c
 // Authors:     Thomas Hesketh, Charlie Arundell, Angus Heinjus
