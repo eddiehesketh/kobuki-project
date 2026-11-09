@@ -6,7 +6,7 @@
 // Description: Entry point and main state machine. Faces the start bollard,
 //              picks the layout from its range, drives the path into storage,
 //              then finds the deposit marker and stops 100 mm in front of it.
-// FSM:         FSM 1 – main state machine (report 4.1). Runs FSM 2, FSM 4
+// FSM:         FSM 1 - main state machine (report 4.1). Runs FSM 2, FSM 4
 //              and FSM 5.
 // Provenance:  Original.
 // ============================================================================
@@ -48,7 +48,7 @@ typedef enum {
     STATE_DEPOSIT
 } MainState;
 
-// Original. FSM 1 – main state machine.
+// Original. FSM 1 - main state machine.
 // Purpose: Set up the peripherals, then run FSM 1 forever.
 // Params:  none.
 // Returns: never returns.

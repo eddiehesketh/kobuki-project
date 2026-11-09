@@ -8,13 +8,13 @@
 //              heading-hold controllers once per loop.
 // FSM:         Motion layer used by FSM 1, FSM 2, FSM 4 and FSM 5.
 // Provenance:  Mixed; each function is labelled below and in kobuki.h.
-//              Provided – project resource (Microcontroller Project Resources,
+//              Provided - project resource (Microcontroller Project Resources,
 //              Dr M. Forbes): Kobuki_Rotate_Angle_Setpoint,
 //              Kobuki_Drive_Distance_Setpoint, Kobuki_Update_LEDs and the
 //              macros marked below.
 //              Adapted from project resource: Kobuki_Read, Kobuki_Rotate_Angle,
 //              Kobuki_Drive_Distance.
-//              Provided – practical drivers: Kobuki_Tx, Kobuki_Rx,
+//              Provided - practical drivers: Kobuki_Tx, Kobuki_Rx,
 //              Kobuki_Drive, Kobuki_Rotate.
 //              Original: Kobuki_Drive_Arc, Kobuki_Heading_Hold_Set,
 //              Kobuki_Drive_Distance_Hold, Kobuki_Drive_Distance_Remaining.
@@ -27,7 +27,7 @@
 #include "uart.h"
 #include "kobuki.h"
 
-// ---- Provided – project resource (Microcontroller Project Resources, Dr M. Forbes) ----
+// ---- Provided - project resource (Microcontroller Project Resources, Dr M. Forbes) ----
 
 #define SIZE_FEEDBACK 26 // feedback payload bytes read each packet
 
@@ -93,7 +93,7 @@ static volatile int16_t hold_angle_tick; // heading-hold target (gyro ticks, 0.0
 uint8_t rotation_complete = 0;
 uint8_t distance_complete = 0;
 
-// Provided – practical drivers.
+// Provided - practical drivers.
 void Kobuki_Tx(uint8_t *payload, uint8_t size_payload)
 {
     uint8_t checksum = 0, i;
@@ -111,7 +111,7 @@ void Kobuki_Tx(uint8_t *payload, uint8_t size_payload)
     UART_Tx(checksum);
 }
 
-// Provided – practical drivers; modified: drains extra payload bytes, flags a short payload.
+// Provided - practical drivers; modified: drains extra payload bytes, flags a short payload.
 uint8_t Kobuki_Rx(uint8_t *feedback, uint32_t size_feedback)
 {
     uint8_t feedback_header = 0, size_payload = 0, checksum = 0, rx_checksum = 0;
@@ -180,7 +180,7 @@ void Kobuki_Read(Kobuki_Typedef *kobuki)
     kobuki->distance_complete = distance_complete;
 }
 
-// Provided – practical drivers.
+// Provided - practical drivers.
 void Kobuki_Drive(int16_t speed)
 {
     uint8_t payload[] = {KOBUKI_CMD_BASE_CONTROL, KOBUKI_BASE_CONTROL_SIZE, 0x00, 0x00, 0x00, 0x00};
@@ -196,7 +196,7 @@ void Kobuki_Drive(int16_t speed)
     Kobuki_Tx(payload, sizeof(payload));
 }
 
-// Provided – practical drivers.
+// Provided - practical drivers.
 void Kobuki_Rotate(int16_t speed)
 {
     uint8_t payload[] = {KOBUKI_CMD_BASE_CONTROL, KOBUKI_BASE_CONTROL_SIZE, 0x00, 0x00, ARC_SPIN_RADIUS_MM, 0x00}; // radius 1: spin
@@ -212,14 +212,14 @@ void Kobuki_Rotate(int16_t speed)
     Kobuki_Tx(payload, sizeof(payload));
 }
 
-// Provided – project resource (Microcontroller Project Resources, Dr M. Forbes).
+// Provided - project resource (Microcontroller Project Resources, Dr M. Forbes).
 void Kobuki_Rotate_Angle_Setpoint(int16_t current_angle_tick, int16_t rot_angle_deg)
 {
     volatile int32_t init_angle;
 
     rotation_complete = 0;
 
-    // Gyro ticks to a heading in the 0–360 degree range.
+    // Gyro ticks to a heading in the 0-360 degree range.
     init_angle = (int32_t)(
         (double)(current_angle_tick + (int32_t)HALF_TURN_CENTIDEG)
         * DEG_PER_TICK
@@ -266,7 +266,7 @@ void Kobuki_Rotate_Angle(int16_t current_angle_tick)
     }
 }
 
-// Provided – project resource (Microcontroller Project Resources, Dr M. Forbes).
+// Provided - project resource (Microcontroller Project Resources, Dr M. Forbes).
 void Kobuki_Drive_Distance_Setpoint(uint16_t current_distance_tick, int16_t distance)
 {
     distance_complete = 0;
@@ -415,10 +415,10 @@ int16_t Kobuki_Drive_Distance_Remaining(uint16_t current_distance_tick)
     return (int16_t)(error_ticks * MM_PER_TICK);
 }
 
-// Provided – project resource (Microcontroller Project Resources, Dr M. Forbes).
+// Provided - project resource (Microcontroller Project Resources, Dr M. Forbes).
 #define EXTERN_PWR 0x30 // GPO bits that keep the external 5 V and 3.3 V outputs on
 
-// Provided – project resource (Microcontroller Project Resources, Dr M. Forbes).
+// Provided - project resource (Microcontroller Project Resources, Dr M. Forbes).
 void Kobuki_Update_LEDs(Kobuki_LED_Enum led_1_colour,
                         Kobuki_LED_Enum led_2_colour)
 {

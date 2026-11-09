@@ -6,7 +6,7 @@
 // Description: Bump and cliff recovery. On a hit during a forward drive leg:
 //              stop, back up, turn away from the hit side, then hand the leg
 //              back with the reversed distance added on.
-// FSM:         FSM 5 – bump and cliff recovery (report 4.5). Runs before FSM 1 each loop.
+// FSM:         FSM 5 - bump and cliff recovery (report 4.5). Runs before FSM 1 each loop.
 // Provenance:  Original.
 // ============================================================================
 

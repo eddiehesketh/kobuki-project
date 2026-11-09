@@ -10,7 +10,7 @@
 // Provenance:  Mixed; see each function below.
 //              SPEED_LIMIT, Kobuki_LED_Enum and the distance, angle,
 //              rotation_complete and distance_complete fields:
-//              Provided – project resource (Microcontroller Project Resources, Dr M. Forbes).
+//              Provided - project resource (Microcontroller Project Resources, Dr M. Forbes).
 // ============================================================================
 
 #pragma once
@@ -44,18 +44,18 @@ typedef enum {
 } Kobuki_LED_Enum;
 
 // Kobuki_Update_LEDs
-// Provenance: Provided – project resource (Microcontroller Project Resources, Dr M. Forbes).
+// Provenance: Provided - project resource (Microcontroller Project Resources, Dr M. Forbes).
 // Purpose:    Set both LED colours and keep the external power outputs on.
 // Params:     led_1_colour, led_2_colour - colour for LED 1 and LED 2.
 // Returns:    nothing.
 // Effects:    sends a general-purpose output command.
 void Kobuki_Update_LEDs(Kobuki_LED_Enum led_1_colour, Kobuki_LED_Enum led_2_colour);
 
-// Provided – project resource. Wheel speed limit (mm/s).
+// Provided - project resource. Wheel speed limit (mm/s).
 #define SPEED_LIMIT (int16_t)(150)
 
 // Kobuki_Rx
-// Provenance: Provided – practical drivers; modified: drains extra payload
+// Provenance: Provided - practical drivers; modified: drains extra payload
 //             bytes, flags a short payload.
 // Purpose:    Read one feedback packet.
 // Params:     feedback      - buffer for the first size_feedback payload bytes.
@@ -65,7 +65,7 @@ void Kobuki_Update_LEDs(Kobuki_LED_Enum led_1_colour, Kobuki_LED_Enum led_2_colo
 uint8_t Kobuki_Rx(uint8_t *feedback, uint32_t size_feedback);
 
 // Kobuki_Tx
-// Provenance: Provided – practical drivers.
+// Provenance: Provided - practical drivers.
 // Purpose:    Send one command packet: 0xAA 0x55, length, payload, XOR checksum.
 // Params:     payload      - command bytes.
 //             size_payload - number of payload bytes.
@@ -83,7 +83,7 @@ void Kobuki_Tx(uint8_t *payload, uint8_t size_payload);
 void Kobuki_Read(Kobuki_Typedef *kobuki);
 
 // Kobuki_Drive
-// Provenance: Provided – practical drivers.
+// Provenance: Provided - practical drivers.
 // Purpose:    Drive straight.
 // Params:     speed - wheel speed (mm/s), clamped to ±SPEED_LIMIT.
 // Returns:    nothing.
@@ -91,7 +91,7 @@ void Kobuki_Read(Kobuki_Typedef *kobuki);
 void Kobuki_Drive(int16_t speed); // +ve is forward
 
 // Kobuki_Rotate
-// Provenance: Provided – practical drivers.
+// Provenance: Provided - practical drivers.
 // Purpose:    Spin on the spot.
 // Params:     speed - wheel speed (mm/s), clamped to ±SPEED_LIMIT.
 // Returns:    nothing.
@@ -99,7 +99,7 @@ void Kobuki_Drive(int16_t speed); // +ve is forward
 void Kobuki_Rotate(int16_t speed); // +ve is CCW
 
 // Kobuki_Rotate_Angle_Setpoint
-// Provenance: Provided – project resource (Microcontroller Project Resources, Dr M. Forbes).
+// Provenance: Provided - project resource (Microcontroller Project Resources, Dr M. Forbes).
 // Purpose:    Set a rotation target relative to a reference heading.
 // Params:     current_angle_tick - reference heading (gyro ticks, 0.01 deg).
 //             rot_angle_deg      - turn from the reference (degrees), +ve CCW.
@@ -118,7 +118,7 @@ void Kobuki_Rotate_Angle_Setpoint(int16_t current_angle_tick, int16_t rot_angle_
 void Kobuki_Rotate_Angle(int16_t current_angle_tick);
 
 // Kobuki_Drive_Distance_Setpoint
-// Provenance: Provided – project resource (Microcontroller Project Resources, Dr M. Forbes).
+// Provenance: Provided - project resource (Microcontroller Project Resources, Dr M. Forbes).
 // Purpose:    Set a straight-line distance target from the current encoder count.
 // Params:     current_distance_tick - encoder count (ticks).
 //             distance              - distance to drive (mm), -ve reverses.

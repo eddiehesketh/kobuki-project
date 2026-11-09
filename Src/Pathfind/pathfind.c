@@ -6,7 +6,7 @@
 // Description: Path following. Drives three legs with two turns between them,
 //              using heading hold on every leg. Turns are aimed from the
 //              leg 1 heading theta 0, so turn errors don't build up.
-// FSM:         FSM 4 – path following (report 4.4). Run by PATHFIND in FSM 1.
+// FSM:         FSM 4 - path following (report 4.4). Run by PATHFIND in FSM 1.
 // Provenance:  Original.
 // ============================================================================
 

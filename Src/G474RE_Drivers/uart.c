@@ -6,7 +6,7 @@
 // Description: Polled USART3 driver (PC10 TX, PC11 RX, 115200 baud) used to
 //              talk to the Kobuki.
 // FSM:         None. Transport for kobuki.c.
-// Provenance:  Provided – practical drivers.
+// Provenance:  Provided - practical drivers.
 // ============================================================================
 
 #define STM32G474xx
@@ -19,7 +19,7 @@
 #define USART3_BRR_VALUE ((HSI16_HZ + (KOBUKI_BAUD_RATE / 2U)) / KOBUKI_BAUD_RATE)
 #define USART3_AF 7U // PC10/PC11 alternate function for USART3
 
-// Provided – practical drivers.
+// Provided - practical drivers.
 void UART_Init(void)
 {
     // Enable peripheral clocks
@@ -52,7 +52,7 @@ void UART_Init(void)
     USART3->CR1 |= USART_CR1_UE;
 }
 
-// Provided – practical drivers.
+// Provided - practical drivers.
 void UART_Tx(uint8_t byte)
 {
     // Wait until Transmit Data Register is Empty (TXE) flag is set
@@ -63,7 +63,7 @@ void UART_Tx(uint8_t byte)
     USART3->TDR = byte;
 }
 
-// Provided – practical drivers.
+// Provided - practical drivers.
 uint8_t UART_Rx(void)
 {
     // If an Overrun Error (ORE) occurs, clear it so we don't get permanently stuck

@@ -6,7 +6,7 @@
 // Description: MB1043 ultrasonic sensor on PA0 (ADC1 channel 1). Converts the
 //              analog output to a range in mm and flags a detection.
 // FSM:         Sensor input for FSM 1, FSM 2 and FSM 3.
-// Provenance:  Provided – practical drivers.
+// Provenance:  Provided - practical drivers.
 // ============================================================================
 
 #include <stdint.h>
@@ -20,7 +20,7 @@
 #define ADC_MAX_VALUE 4095UL // 12-bit ADC full scale
 #define MB1043_FULL_SCALE_MM 5120UL // MB1043 output is Vcc / 5120 per mm
 
-// Provided – practical drivers.
+// Provided - practical drivers.
 void Ultrasonic_Init(void)
 {
     RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
@@ -28,7 +28,7 @@ void Ultrasonic_Init(void)
     GPIOA->PUPDR &= ~GPIO_PUPDR_PUPD0; // no pull-up or pull-down
 }
 
-// Provided – practical drivers.
+// Provided - practical drivers.
 uint16_t Ultrasonic_Read(void)
 {
     uint16_t adc_value = ADC_Read(ULTRASONIC_CHANNEL);
@@ -43,7 +43,7 @@ uint16_t Ultrasonic_Read(void)
     return (uint16_t)distance_mm;
 }
 
-// Provided – practical drivers.
+// Provided - practical drivers.
 void Ultrasonic_Detect(US_Typedef *object)
 {
     if (object == 0) {

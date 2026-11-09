@@ -6,7 +6,7 @@
 // Description: Scan-and-face. Runs the edge scan (FSM 3) with a range limit,
 //              then turns to face the object it found. Used for the start
 //              bollard (840 mm) and the deposit marker (560 mm).
-// FSM:         FSM 2 – scan-and-face (report 4.2). Used by ORIENT and STORAGE in FSM 1.
+// FSM:         FSM 2 - scan-and-face (report 4.2). Used by ORIENT and STORAGE in FSM 1.
 // Provenance:  Original.
 // ============================================================================
 

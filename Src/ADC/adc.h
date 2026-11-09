@@ -6,7 +6,7 @@
 // Description: Polled ADC1 driver for single 12-bit conversions on regular
 //              channels 1 to 18.
 // FSM:         None. Used by ultrasonic.c.
-// Provenance:  Provided – practical drivers.
+// Provenance:  Provided - practical drivers.
 // ============================================================================
 
 #pragma once
@@ -16,7 +16,7 @@
 #define ADC_CHANNEL_1 ((uint8_t)1U) // ADC1_IN1 on PA0
 
 // ADC_Init
-// Provenance: Provided – practical drivers.
+// Provenance: Provided - practical drivers.
 // Purpose:    Power up, calibrate and enable ADC1.
 // Params:     none.
 // Returns:    nothing.

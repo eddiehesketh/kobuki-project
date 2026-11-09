@@ -6,7 +6,7 @@
 // Description: MB1043 ultrasonic sensor on PA0 (ADC1 channel 1). Converts the
 //              analog output to a range in mm and flags a detection.
 // FSM:         Sensor input for FSM 1, FSM 2 and FSM 3.
-// Provenance:  Provided – practical drivers.
+// Provenance:  Provided - practical drivers.
 // ============================================================================
 
 #pragma once
@@ -25,7 +25,7 @@ typedef struct {
 } US_Typedef;
 
 // Ultrasonic_Init
-// Provenance: Provided – practical drivers.
+// Provenance: Provided - practical drivers.
 // Purpose:    Set PA0 to analog input for the sensor.
 // Params:     none.
 // Returns:    nothing.
@@ -33,7 +33,7 @@ typedef struct {
 void Ultrasonic_Init(void);
 
 // Ultrasonic_Read
-// Provenance: Provided – practical drivers.
+// Provenance: Provided - practical drivers.
 // Purpose:    Read the sensor range.
 // Params:     none.
 // Returns:    range (mm), 0 to ULTRASONIC_MAX_RANGE_MM.
@@ -41,7 +41,7 @@ void Ultrasonic_Init(void);
 uint16_t Ultrasonic_Read(void);
 
 // Ultrasonic_Detect
-// Provenance: Provided – practical drivers.
+// Provenance: Provided - practical drivers.
 // Purpose:    Read the range and flag whether an object is in detection range.
 // Params:     object - result to fill (ignored if null).
 // Returns:    nothing.

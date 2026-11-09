@@ -6,7 +6,7 @@
 // Description: Polled ADC1 driver for single 12-bit conversions on regular
 //              channels 1 to 18.
 // FSM:         None. Used by ultrasonic.c.
-// Provenance:  Provided – practical drivers.
+// Provenance:  Provided - practical drivers.
 // ============================================================================
 
 #include <stdint.h>
@@ -22,7 +22,7 @@
 #define ADC_SMP_BITS_PER_CHANNEL 3U // sample-time field width
 #define ADC_SMP_LONGEST 7UL // 0b111: longest sample time (640.5 ADC clocks)
 
-// Provided – practical drivers.
+// Provided - practical drivers.
 void ADC_Init(void)
 {
     // Enable the ADC12 peripheral clock.
@@ -57,7 +57,7 @@ void ADC_Init(void)
     }
 }
 
-// Provided – practical drivers.
+// Provided - practical drivers.
 uint16_t ADC_Read(uint8_t channel)
 {
     // This driver supports ADC1 regular channels 1 to 18.

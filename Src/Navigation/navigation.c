@@ -6,7 +6,7 @@
 // Description: Edge scan. Spins counter-clockwise, records the heading where
 //              an object enters (theta 1) and leaves (theta 2) the ultrasonic
 //              beam, then turns to face the lag-corrected midpoint.
-// FSM:         FSM 3 – edge scan (report 4.3). Run by ORIENT_SCANNING in FSM 2.
+// FSM:         FSM 3 - edge scan (report 4.3). Run by ORIENT_SCANNING in FSM 2.
 // Provenance:  Original.
 // ============================================================================
 
