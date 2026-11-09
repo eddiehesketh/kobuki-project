@@ -30,6 +30,14 @@
 
 #define SIZE_FEEDBACK 26 // feedback payload bytes read each packet
 
+// Packet framing and the base-control command (Kobuki protocol).
+#define KOBUKI_HEADER_0 0xAAU // first header byte
+#define KOBUKI_HEADER_1 0x55U // second header byte
+#define KOBUKI_CMD_BASE_CONTROL 0x01U // base-control command ID
+#define KOBUKI_BASE_CONTROL_SIZE 0x04U // speed (2 bytes) + radius (2 bytes)
+#define KOBUKI_CMD_GPO 0x0CU // general-purpose output command ID
+#define KOBUKI_GPO_SIZE 0x02U // two data bytes
+
 // Feedback packet field offsets.
 #define BUMPER 4
 #define WHEEL_DROP 5
@@ -54,6 +62,10 @@
 
 #define GAIN_DRIVE (100.0 / 100.0) // Kp for distance P-controller (mm/s per mm), 1.0 is the default
 
+// Whole-degree headings used by the rotation controller.
+#define DEG_FULL_TURN 360
+#define DEG_HALF_TURN 180
+
 static volatile int32_t setpoint_distance_tick; // distance target (encoder ticks)
 static volatile int16_t setpoint_angle_deg; // rotation target (degrees, 0-359)
 static volatile int16_t hold_angle_tick; // heading-hold target (gyro ticks, 0.01 deg)
@@ -67,6 +79,15 @@ static volatile int16_t hold_angle_tick; // heading-hold target (gyro ticks, 0.0
 #define HOLD_MAX_RATE_RAD_S (0.30)
 // Kobuki wheelbase b (mm), from the Kobuki spec.
 #define WHEELBASE_MM (230.0)
+// A drive counts as finished within this distance of the target (mm).
+#define DISTANCE_TOLERANCE_MM 2
+// Above this radius (mm) the heading error is tiny, so drive straight.
+#define HOLD_STRAIGHT_RADIUS_MM (30000.0)
+// Kobuki radius codes: |R| <= 1 means spin on the spot, so arcs use at least 2 mm.
+#define ARC_SPIN_RADIUS_MM 1
+#define ARC_MIN_RADIUS_MM 2
+// The 16-bit encoder count wraps between 65535 and 0.
+#define ENCODER_WRAP_TICKS 65536
 
 uint8_t rotation_complete = 0;
 uint8_t distance_complete = 0;
@@ -76,8 +97,8 @@ void Kobuki_Tx(uint8_t *payload, uint8_t size_payload)
 {
     uint8_t checksum = 0, i;
 
-    UART_Tx(0xAA); // header
-    UART_Tx(0x55);
+    UART_Tx(KOBUKI_HEADER_0); // header
+    UART_Tx(KOBUKI_HEADER_1);
     UART_Tx(size_payload);
     checksum ^= size_payload;
 
@@ -100,9 +121,9 @@ uint8_t Kobuki_Rx(uint8_t *feedback, uint32_t size_feedback)
     // main loop's 50 Hz pacing. With the Kobuki unplugged, the board waits here.
     while (1) {
         feedback_header = UART_Rx();
-        if (feedback_header == 0xAA) {
+        if (feedback_header == KOBUKI_HEADER_0) {
             feedback_header = UART_Rx();
-            if (feedback_header == 0x55) {
+            if (feedback_header == KOBUKI_HEADER_1) {
                 break;
             }
         }
@@ -161,7 +182,7 @@ void Kobuki_Read(Kobuki_Typedef *kobuki)
 // Provided – practical drivers.
 void Kobuki_Drive(int16_t speed)
 {
-    uint8_t payload[] = {0x01, 0x04, 0x00, 0x00, 0x00, 0x00};
+    uint8_t payload[] = {KOBUKI_CMD_BASE_CONTROL, KOBUKI_BASE_CONTROL_SIZE, 0x00, 0x00, 0x00, 0x00};
 
     if (speed > SPEED_LIMIT) {
         speed = SPEED_LIMIT;
@@ -177,7 +198,7 @@ void Kobuki_Drive(int16_t speed)
 // Provided – practical drivers.
 void Kobuki_Rotate(int16_t speed)
 {
-    uint8_t payload[] = {0x01, 0x04, 0x00, 0x00, 0x01, 0x00};
+    uint8_t payload[] = {KOBUKI_CMD_BASE_CONTROL, KOBUKI_BASE_CONTROL_SIZE, 0x00, 0x00, ARC_SPIN_RADIUS_MM, 0x00}; // radius 1: spin
 
     if (speed > SPEED_LIMIT) {
         speed = SPEED_LIMIT;
@@ -199,13 +220,13 @@ void Kobuki_Rotate_Angle_Setpoint(int16_t current_angle_tick, int16_t rot_angle_
 
     // Gyro ticks to a heading in the 0–360 degree range.
     init_angle = (int32_t)(
-        (double)(current_angle_tick + (int32_t)18000)
+        (double)(current_angle_tick + (int32_t)HALF_TURN_CENTIDEG)
         * DEG_PER_TICK
     );
 
     // Target heading after the requested rotation.
     setpoint_angle_deg =
-        (init_angle + rot_angle_deg + 360) % 360;
+        (init_angle + rot_angle_deg + DEG_FULL_TURN) % DEG_FULL_TURN;
 }
 
 // Adapted from project resource: plain ±180° short-way wrap instead of the modulo-180 special case; stops the motor on completion.
@@ -217,7 +238,7 @@ void Kobuki_Rotate_Angle(int16_t current_angle_tick)
 
     // Gyro ticks to degrees.
     current_angle_deg = (int32_t)(
-        (double)(current_angle_tick + (int32_t)18000)
+        (double)(current_angle_tick + (int32_t)HALF_TURN_CENTIDEG)
         * DEG_PER_TICK
     );
 
@@ -225,10 +246,10 @@ void Kobuki_Rotate_Angle(int16_t current_angle_tick)
     error = (int16_t)(setpoint_angle_deg - current_angle_deg);
 
     // Take the short way around.
-    if (error > 180) {
-        error -= 360;
-    } else if (error < -180) {
-        error += 360;
+    if (error > DEG_HALF_TURN) {
+        error -= DEG_FULL_TURN;
+    } else if (error < -DEG_HALF_TURN) {
+        error += DEG_FULL_TURN;
     }
 
     // Done at zero whole-degree error.
@@ -269,16 +290,16 @@ void Kobuki_Drive_Distance(uint16_t current_distance_tick)
                 - (int32_t)current_distance_tick;
 
     // Encoder wraps between 65535 and 0.
-    if (error_ticks > 32767) {
-        error_ticks -= 65536;
-    } else if (error_ticks < -32768) {
-        error_ticks += 65536;
+    if (error_ticks > INT16_MAX) {
+        error_ticks -= ENCODER_WRAP_TICKS;
+    } else if (error_ticks < INT16_MIN) {
+        error_ticks += ENCODER_WRAP_TICKS;
     }
 
     // Remaining ticks to millimetres.
     error_mm = (int16_t)(error_ticks * MM_PER_TICK);
 
-    if (abs(error_mm) <= 2) {
+    if (abs(error_mm) <= DISTANCE_TOLERANCE_MM) {
         distance_complete = 1;
         Kobuki_Drive(0);
     } else {
@@ -295,9 +316,9 @@ void Kobuki_Drive_Arc(int16_t speed, int16_t radius)
     int32_t cmd_speed = speed;
 
     // Arc speed is scaled by (R ± b/2) / R. b is the wheelbase.
-    if (radius > 1) {
+    if (radius > ARC_SPIN_RADIUS_MM) {
         cmd_speed = (int32_t)((double)speed * ((double)radius + WHEELBASE_MM / 2.0) / (double)radius);
-    } else if (radius < -1) {
+    } else if (radius < -ARC_SPIN_RADIUS_MM) {
         cmd_speed = (int32_t)((double)speed * ((double)radius - WHEELBASE_MM / 2.0) / (double)radius);
     }
 
@@ -307,7 +328,7 @@ void Kobuki_Drive_Arc(int16_t speed, int16_t radius)
         cmd_speed = -SPEED_LIMIT;
     }
 
-    uint8_t payload[] = {0x01, 0x04, 0x00, 0x00, 0x00, 0x00};
+    uint8_t payload[] = {KOBUKI_CMD_BASE_CONTROL, KOBUKI_BASE_CONTROL_SIZE, 0x00, 0x00, 0x00, 0x00};
     payload[2] = (uint8_t)cmd_speed;
     payload[3] = (uint8_t)(cmd_speed >> 8);
     payload[4] = (uint8_t)radius;
@@ -327,15 +348,15 @@ void Kobuki_Drive_Distance_Hold(uint16_t current_distance_tick, int16_t current_
     int32_t error_ticks = (int32_t)(uint16_t)setpoint_distance_tick
                         - (int32_t)current_distance_tick;
 
-    if (error_ticks > 32767) {
-        error_ticks -= 65536;
-    } else if (error_ticks < -32768) {
-        error_ticks += 65536;
+    if (error_ticks > INT16_MAX) {
+        error_ticks -= ENCODER_WRAP_TICKS;
+    } else if (error_ticks < INT16_MIN) {
+        error_ticks += ENCODER_WRAP_TICKS;
     }
 
     int16_t error_mm = (int16_t)(error_ticks * MM_PER_TICK);
 
-    if (abs(error_mm) <= 2) {
+    if (abs(error_mm) <= DISTANCE_TOLERANCE_MM) {
         distance_complete = 1;
         Kobuki_Drive(0);
         return;
@@ -366,12 +387,12 @@ void Kobuki_Drive_Distance_Hold(uint16_t current_distance_tick, int16_t current_
     // radius = speed / turn rate. Sign flips when reversing.
     double radius = (turn_rate != 0.0) ? ((double)speed / turn_rate) : 0.0;
 
-    if ((radius > 30000.0) || (radius < -30000.0) || (turn_rate == 0.0)) {
+    if ((radius > HOLD_STRAIGHT_RADIUS_MM) || (radius < -HOLD_STRAIGHT_RADIUS_MM) || (turn_rate == 0.0)) {
         Kobuki_Drive_Arc(speed, 0); // error is tiny, drive straight
     } else {
         int16_t radius_mm = (int16_t)radius;
-        if ((radius_mm >= -1) && (radius_mm <= 1)) {
-            radius_mm = (radius_mm < 0) ? -2 : 2; // ±1 means spin on the spot
+        if ((radius_mm >= -ARC_SPIN_RADIUS_MM) && (radius_mm <= ARC_SPIN_RADIUS_MM)) {
+            radius_mm = (radius_mm < 0) ? -ARC_MIN_RADIUS_MM : ARC_MIN_RADIUS_MM; // ±1 means spin on the spot
         }
         Kobuki_Drive_Arc(speed, radius_mm);
     }
@@ -384,10 +405,10 @@ int16_t Kobuki_Drive_Distance_Remaining(uint16_t current_distance_tick)
                         - (int32_t)current_distance_tick;
 
     // Encoder wraps between 65535 and 0.
-    if (error_ticks > 32767) {
-        error_ticks -= 65536;
-    } else if (error_ticks < -32768) {
-        error_ticks += 65536;
+    if (error_ticks > INT16_MAX) {
+        error_ticks -= ENCODER_WRAP_TICKS;
+    } else if (error_ticks < INT16_MIN) {
+        error_ticks += ENCODER_WRAP_TICKS;
     }
 
     return (int16_t)(error_ticks * MM_PER_TICK);
@@ -409,8 +430,8 @@ void Kobuki_Update_LEDs(Kobuki_LED_Enum led_1_colour,
     );
 
     uint8_t payload[] = {
-        0x0C, // general-purpose output
-        0x02, // two data bytes
+        KOBUKI_CMD_GPO,
+        KOBUKI_GPO_SIZE,
         GPO_lsb,
         GPO_msb
     };

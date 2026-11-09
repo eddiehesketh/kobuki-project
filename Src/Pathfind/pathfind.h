@@ -17,7 +17,7 @@
 #define PATH_RUNNING 0U // a leg or turn is in progress
 #define PATH_DONE 1U // leg 3 finished
 
-// Path parameters (report Table 4). Loaded by Decision_Determine_Layout in DECISION.
+// Path parameters (report Table 5). Loaded by Decision_Determine_Layout in DECISION.
 extern int16_t path_orient_angle; // ALIGN turn onto leg 1 (degrees)
 extern int16_t path_first_angle; // turn 1 from theta 0 (degrees)
 extern int16_t path_second_angle; // turn 2, added to turn 1 (degrees)
@@ -33,9 +33,9 @@ typedef enum {
     SECOND_DRIVE,
     SECOND_ROTATE,
     THIRD_DRIVE
-} pathfind_state;
+} PathfindState;
 
-extern pathfind_state path_state;
+extern PathfindState path_state;
 
 // Pathfind_Reset
 // Provenance: Original.

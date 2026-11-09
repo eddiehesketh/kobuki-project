@@ -52,7 +52,7 @@ typedef enum {
 // Params:  none.
 // Returns: never returns.
 // Effects: drives the robot through a full run each time B0 is pressed.
-int main()
+int main(void)
 {
     MainState current_state = STATE_IDLE;
 

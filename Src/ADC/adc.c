@@ -13,11 +13,19 @@
 #include "stm32g4xx.h"
 #include "adc.h"
 
+#define ADC_REGULATOR_DELAY_LOOPS 1000U // busy-wait for the voltage regulator to settle
+#define ADC_FIRST_CHANNEL 1U // lowest regular channel this driver accepts
+#define ADC_LAST_CHANNEL 18U // highest regular channel this driver accepts
+#define ADC_SMPR1_LAST_CHANNEL 9U // channels 0-9 are in SMPR1, 10-18 in SMPR2
+#define ADC_SMPR2_FIRST_CHANNEL 10U
+#define ADC_SMP_BITS_PER_CHANNEL 3U // sample-time field width
+#define ADC_SMP_LONGEST 7UL // 0b111: longest sample time (640.5 ADC clocks)
+
 // Provided – practical drivers.
 void ADC_Init(void)
 {
     // Enable the ADC12 peripheral clock.
-    RCC->AHB2ENR |= (1 << 13);
+    RCC->AHB2ENR |= RCC_AHB2ENR_ADC12EN;
 
     // Select synchronous HCLK/1 as the ADC clock.
     ADC12_COMMON->CCR &= ~ADC_CCR_CKMODE;
@@ -28,7 +36,7 @@ void ADC_Init(void)
     ADC1->CR |= ADC_CR_ADVREGEN;
 
     // Allow the voltage regulator to stabilise.
-    for (volatile uint32_t i = 0U; i < 1000U; ++i) {
+    for (volatile uint32_t i = 0U; i < ADC_REGULATOR_DELAY_LOOPS; ++i) {
         __NOP();
     }
 
@@ -52,7 +60,7 @@ void ADC_Init(void)
 uint16_t ADC_Read(uint8_t channel)
 {
     // This driver supports ADC1 regular channels 1 to 18.
-    if ((channel < 1U) || (channel > 18U)) {
+    if ((channel < ADC_FIRST_CHANNEL) || (channel > ADC_LAST_CHANNEL)) {
         return 0U;
     }
 
@@ -60,14 +68,14 @@ uint16_t ADC_Read(uint8_t channel)
     ADC1->SQR1 = ((uint32_t)channel << ADC_SQR1_SQ1_Pos);
 
     // Select the longest sample time for a stable sensor measurement.
-    if (channel <= 9U) {
-        uint32_t position = (uint32_t)channel * 3U;
-        ADC1->SMPR1 &= ~(7UL << position);
-        ADC1->SMPR1 |= (7UL << position);
+    if (channel <= ADC_SMPR1_LAST_CHANNEL) {
+        uint32_t position = (uint32_t)channel * ADC_SMP_BITS_PER_CHANNEL;
+        ADC1->SMPR1 &= ~(ADC_SMP_LONGEST << position);
+        ADC1->SMPR1 |= (ADC_SMP_LONGEST << position);
     } else {
-        uint32_t position = ((uint32_t)channel - 10U) * 3U;
-        ADC1->SMPR2 &= ~(7UL << position);
-        ADC1->SMPR2 |= (7UL << position);
+        uint32_t position = ((uint32_t)channel - ADC_SMPR2_FIRST_CHANNEL) * ADC_SMP_BITS_PER_CHANNEL;
+        ADC1->SMPR2 &= ~(ADC_SMP_LONGEST << position);
+        ADC1->SMPR2 |= (ADC_SMP_LONGEST << position);
     }
 
     // Clear completion flags and start the conversion.

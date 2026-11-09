@@ -10,6 +10,13 @@
 
 #define STM32G474xx
 #include "stm32g4xx.h"
+#include "uart.h"
+
+#define HSI16_HZ 16000000U // USART3 clock source (Hz)
+#define KOBUKI_BAUD_RATE 115200U // Kobuki serial rate (baud)
+// Baud divider, rounded to the nearest whole number: 16 MHz / 115200 = 139.
+#define USART3_BRR_VALUE ((HSI16_HZ + (KOBUKI_BAUD_RATE / 2U)) / KOBUKI_BAUD_RATE)
+#define USART3_AF 7U // PC10/PC11 alternate function for USART3
 
 // Provided – practical drivers.
 void UART_Init(void)
@@ -20,7 +27,7 @@ void UART_Init(void)
 
     // Route HSI16 clock to USART3
     RCC->CCIPR &= ~RCC_CCIPR_USART3SEL;
-    RCC->CCIPR |= (2 << RCC_CCIPR_USART3SEL_Pos);
+    RCC->CCIPR |= RCC_CCIPR_USART3SEL_1; // 0b10: HSI16
 
     // Configure PC10 (TX) and PC11 (RX)
     GPIOC->MODER &= ~(GPIO_MODER_MODE10 | GPIO_MODER_MODE11);
@@ -28,16 +35,14 @@ void UART_Init(void)
 
     // Alternate function mode
     // Route Alternate Function 7 (AF7) to PC10 and PC11
-    GPIOC->AFR[1] &= ~((0xF << GPIO_AFRH_AFSEL10_Pos) |
-                       (0xF << GPIO_AFRH_AFSEL11_Pos));
-    GPIOC->AFR[1] |= ((7 << GPIO_AFRH_AFSEL10_Pos) | (7 << GPIO_AFRH_AFSEL11_Pos));
+    GPIOC->AFR[1] &= ~(GPIO_AFRH_AFSEL10 | GPIO_AFRH_AFSEL11);
+    GPIOC->AFR[1] |= ((USART3_AF << GPIO_AFRH_AFSEL10_Pos) | (USART3_AF << GPIO_AFRH_AFSEL11_Pos));
 
     // Configure USART3
     USART3->CR1 &= ~USART_CR1_UE; // Turn off to allow config
 
-    // Set Baud Rate to 115200 (Assuming 16 MHz HSI clock clocksource)
-    // 16 MHz / 115200 ≈ 139
-    USART3->BRR = 139;
+    // Set Baud Rate to 115200 from the 16 MHz HSI16 clock.
+    USART3->BRR = USART3_BRR_VALUE;
 
     // Enable Transmitter (TE) and Receiver (RE)
     USART3->CR1 |= (USART_CR1_TE | USART_CR1_RE);

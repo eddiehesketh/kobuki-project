@@ -4,7 +4,7 @@
 // Date:        November 2026
 // Description: Layout decision. Picks layout A or B from the range to the
 //              start bollard and loads that layout's path parameters
-//              (report Table 4) for FSM 4.
+//              (report Table 5) for FSM 4.
 // FSM:         Used by DECISION in FSM 1 (report 4.1).
 // Provenance:  Original.
 // ============================================================================
